@@ -2,9 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"github.com/Calcium-Ion/go-epay/epay"
-	"github.com/gin-gonic/gin"
-	"github.com/samber/lo"
 	"log"
 	"net/url"
 	"one-api/common"
@@ -14,6 +11,10 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/Calcium-Ion/go-epay/epay"
+	"github.com/gin-gonic/gin"
+	"github.com/samber/lo"
 )
 
 type EpayRequest struct {
