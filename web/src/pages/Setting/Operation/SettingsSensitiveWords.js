@@ -72,7 +72,7 @@ export default function SettingsSensitiveWords(props) {
           style={{ marginBottom: 15 }}
         >
           <Form.Section text={'屏蔽词过滤设置'}>
-            <Row gutter={16}>
+            <Row gutter={24}>
               <Col span={8}>
                 <Form.Switch
                   field={'CheckSensitiveEnabled'}
@@ -105,7 +105,7 @@ export default function SettingsSensitiveWords(props) {
               </Col>
             </Row>
             <Row>
-              <Col span={16}>
+              <Col span={24}>
                 <Form.TextArea
                   label={'屏蔽词列表'}
                   extraText={'一行一个屏蔽词，不需要符号分割'}

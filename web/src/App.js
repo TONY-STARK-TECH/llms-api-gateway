@@ -28,7 +28,6 @@ import Task from "./pages/Task/index.js";
 
 const Home = lazy(() => import('./pages/Home'));
 const Detail = lazy(() => import('./pages/Detail'));
-const About = lazy(() => import('./pages/About'));
 
 function App() {
   const [userState, userDispatch] = useContext(UserContext);
@@ -236,14 +235,6 @@ function App() {
             element={
               <Suspense fallback={<Loading></Loading>}>
                 <Pricing />
-              </Suspense>
-            }
-          />
-          <Route
-            path='/about'
-            element={
-              <Suspense fallback={<Loading></Loading>}>
-                <About />
               </Suspense>
             }
           />

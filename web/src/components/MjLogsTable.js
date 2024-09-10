@@ -570,7 +570,7 @@ const LogsTable = () => {
         ) : (
           <></>
         )}
-        <Form layout='horizontal' style={{ marginTop: 10 }}>
+        <Form layout='horizontal'>
           <>
             <Form.Input
               field='channel_id'

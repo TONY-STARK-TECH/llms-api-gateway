@@ -5,7 +5,6 @@ import {
   Form,
   Grid,
   Header,
-  Message,
   Modal,
 } from 'semantic-ui-react';
 import { API, removeTrailingSlash, showError, verifyJSON } from '../helpers';
@@ -176,14 +175,6 @@ const SystemSetting = () => {
     await updateOption('ServerAddress', ServerAddress);
   };
 
-  const submitWorker = async () => {
-    let WorkerUrl = removeTrailingSlash(inputs.WorkerUrl);
-    await updateOption('WorkerUrl', WorkerUrl);
-    if (inputs.WorkerValidKey !== '') {
-      await updateOption('WorkerValidKey', inputs.WorkerValidKey);
-    }
-  }
-
   const submitPayAddress = async () => {
     if (inputs.ServerAddress === '') {
       showError('请先填写服务器地址');
@@ -231,19 +222,6 @@ const SystemSetting = () => {
     }
   };
 
-  const submitEmailDomainWhitelist = async () => {
-    if (
-      originInputs['EmailDomainWhitelist'] !==
-        inputs.EmailDomainWhitelist.join(',') &&
-      inputs.SMTPToken !== ''
-    ) {
-      await updateOption(
-        'EmailDomainWhitelist',
-        inputs.EmailDomainWhitelist.join(','),
-      );
-    }
-  };
-
   const submitWeChat = async () => {
     if (originInputs['WeChatServerAddress'] !== inputs.WeChatServerAddress) {
       await updateOption(
@@ -280,46 +258,6 @@ const SystemSetting = () => {
     }
   };
 
-  const submitTelegramSettings = async () => {
-    // await updateOption('TelegramOAuthEnabled', inputs.TelegramOAuthEnabled);
-    await updateOption('TelegramBotToken', inputs.TelegramBotToken);
-    await updateOption('TelegramBotName', inputs.TelegramBotName);
-  };
-
-  const submitTurnstile = async () => {
-    if (originInputs['TurnstileSiteKey'] !== inputs.TurnstileSiteKey) {
-      await updateOption('TurnstileSiteKey', inputs.TurnstileSiteKey);
-    }
-    if (
-      originInputs['TurnstileSecretKey'] !== inputs.TurnstileSecretKey &&
-      inputs.TurnstileSecretKey !== ''
-    ) {
-      await updateOption('TurnstileSecretKey', inputs.TurnstileSecretKey);
-    }
-  };
-
-  const submitNewRestrictedDomain = () => {
-    const localDomainList = inputs.EmailDomainWhitelist;
-    if (
-      restrictedDomainInput !== '' &&
-      !localDomainList.includes(restrictedDomainInput)
-    ) {
-      setRestrictedDomainInput('');
-      setInputs({
-        ...inputs,
-        EmailDomainWhitelist: [...localDomainList, restrictedDomainInput],
-      });
-      setEmailDomainWhitelist([
-        ...EmailDomainWhitelist,
-        {
-          key: restrictedDomainInput,
-          text: restrictedDomainInput,
-          value: restrictedDomainInput,
-        },
-      ]);
-    }
-  };
-
   return (
     <Grid columns={1}>
       <Grid.Column>
@@ -338,28 +276,6 @@ const SystemSetting = () => {
           </Form.Group>
           <Form.Button onClick={submitServerAddress}>
             更新服务器地址
-          </Form.Button>
-          <Header as='h3' inverted={isDark}>
-            代理设置（支持 <a href='https://github.com/Calcium-Ion/new-api-worker' target='_blank' rel='noreferrer'>new-api-worker</a>）
-          </Header>
-          <Form.Group widths='equal'>
-            <Form.Input
-              label='Worker地址，不填写则不启用代理'
-              placeholder='例如：https://workername.yourdomain.workers.dev'
-              value={inputs.WorkerUrl}
-              name='WorkerUrl'
-              onChange={handleInputChange}
-            />
-            <Form.Input
-              label='Worker密钥，根据你部署的 Worker 填写'
-              placeholder='例如：your_secret_key'
-              value={inputs.WorkerValidKey}
-              name='WorkerValidKey'
-              onChange={handleInputChange}
-            />
-          </Form.Group>
-          <Form.Button onClick={submitWorker}>
-            更新Worker设置
           </Form.Button>
           <Divider />
           <Header as='h3' inverted={isDark}>
@@ -478,21 +394,9 @@ const SystemSetting = () => {
               onChange={handleInputChange}
             />
             <Form.Checkbox
-              checked={inputs.GitHubOAuthEnabled === 'true'}
-              label='允许通过 GitHub 账户登录 & 注册'
-              name='GitHubOAuthEnabled'
-              onChange={handleInputChange}
-            />
-            <Form.Checkbox
               checked={inputs.WeChatAuthEnabled === 'true'}
               label='允许通过微信登录 & 注册'
               name='WeChatAuthEnabled'
-              onChange={handleInputChange}
-            />
-            <Form.Checkbox
-              checked={inputs.TelegramOAuthEnabled === 'true'}
-              label='允许通过 Telegram 进行登录'
-              name='TelegramOAuthEnabled'
               onChange={handleInputChange}
             />
           </Form.Group>
@@ -503,78 +407,7 @@ const SystemSetting = () => {
               name='RegisterEnabled'
               onChange={handleInputChange}
             />
-            <Form.Checkbox
-              checked={inputs.TurnstileCheckEnabled === 'true'}
-              label='启用 Turnstile 用户校验'
-              name='TurnstileCheckEnabled'
-              onChange={handleInputChange}
-            />
           </Form.Group>
-          <Divider />
-          <Header as='h3' inverted={isDark}>
-            配置邮箱域名白名单
-            <Header.Subheader>
-              用以防止恶意用户利用临时邮箱批量注册
-            </Header.Subheader>
-          </Header>
-          <Form.Group widths={3}>
-            <Form.Checkbox
-              label='启用邮箱域名白名单'
-              name='EmailDomainRestrictionEnabled'
-              onChange={handleInputChange}
-              checked={inputs.EmailDomainRestrictionEnabled === 'true'}
-            />
-          </Form.Group>
-          <Form.Group widths={3}>
-            <Form.Checkbox
-              label='启用邮箱别名限制（例如：ab.cd@gmail.com）'
-              name='EmailAliasRestrictionEnabled'
-              onChange={handleInputChange}
-              checked={inputs.EmailAliasRestrictionEnabled === 'true'}
-            />
-          </Form.Group>
-          <Form.Group widths={2}>
-            <Form.Dropdown
-              label='允许的邮箱域名'
-              placeholder='允许的邮箱域名'
-              name='EmailDomainWhitelist'
-              required
-              fluid
-              multiple
-              selection
-              onChange={handleInputChange}
-              value={inputs.EmailDomainWhitelist}
-              autoComplete='new-password'
-              options={EmailDomainWhitelist}
-            />
-            <Form.Input
-              label='添加新的允许的邮箱域名'
-              action={
-                <Button
-                  type='button'
-                  onClick={() => {
-                    submitNewRestrictedDomain();
-                  }}
-                >
-                  填入
-                </Button>
-              }
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  submitNewRestrictedDomain();
-                }
-              }}
-              autoComplete='new-password'
-              placeholder='输入新的允许的邮箱域名'
-              value={restrictedDomainInput}
-              onChange={(e, { value }) => {
-                setRestrictedDomainInput(value);
-              }}
-            />
-          </Form.Group>
-          <Form.Button onClick={submitEmailDomainWhitelist}>
-            保存邮箱域名白名单设置
-          </Form.Button>
           <Divider />
           <Header as='h3' inverted={isDark}>
             配置 SMTP
@@ -636,48 +469,6 @@ const SystemSetting = () => {
           <Form.Button onClick={submitSMTP}>保存 SMTP 设置</Form.Button>
           <Divider />
           <Header as='h3' inverted={isDark}>
-            配置 GitHub OAuth App
-            <Header.Subheader>
-              用以支持通过 GitHub 进行登录注册，
-              <a
-                href='https://github.com/settings/developers'
-                target='_blank'
-                rel='noreferrer'
-              >
-                点击此处
-              </a>
-              管理你的 GitHub OAuth App
-            </Header.Subheader>
-          </Header>
-          <Message>
-            Homepage URL 填 <code>{inputs.ServerAddress}</code>
-            ，Authorization callback URL 填{' '}
-            <code>{`${inputs.ServerAddress}/oauth/github`}</code>
-          </Message>
-          <Form.Group widths={3}>
-            <Form.Input
-              label='GitHub Client ID'
-              name='GitHubClientId'
-              onChange={handleInputChange}
-              autoComplete='new-password'
-              value={inputs.GitHubClientId}
-              placeholder='输入你注册的 GitHub OAuth APP 的 ID'
-            />
-            <Form.Input
-              label='GitHub Client Secret'
-              name='GitHubClientSecret'
-              onChange={handleInputChange}
-              type='password'
-              autoComplete='new-password'
-              value={inputs.GitHubClientSecret}
-              placeholder='敏感信息不会发送到前端显示'
-            />
-          </Form.Group>
-          <Form.Button onClick={submitGitHubOAuth}>
-            保存 GitHub OAuth 设置
-          </Form.Button>
-          <Divider />
-          <Header as='h3' inverted={isDark}>
             配置 WeChat Server
             <Header.Subheader>
               用以支持通过微信进行登录注册，
@@ -720,66 +511,6 @@ const SystemSetting = () => {
           </Form.Group>
           <Form.Button onClick={submitWeChat}>
             保存 WeChat Server 设置
-          </Form.Button>
-          <Divider />
-          <Header as='h3' inverted={isDark}>
-            配置 Telegram 登录
-          </Header>
-          <Form.Group inline>
-            <Form.Input
-              label='Telegram Bot Token'
-              name='TelegramBotToken'
-              onChange={handleInputChange}
-              value={inputs.TelegramBotToken}
-              placeholder='输入你的 Telegram Bot Token'
-            />
-            <Form.Input
-              label='Telegram Bot 名称'
-              name='TelegramBotName'
-              onChange={handleInputChange}
-              value={inputs.TelegramBotName}
-              placeholder='输入你的 Telegram Bot 名称'
-            />
-          </Form.Group>
-          <Form.Button onClick={submitTelegramSettings}>
-            保存 Telegram 登录设置
-          </Form.Button>
-          <Divider />
-          <Header as='h3' inverted={isDark}>
-            配置 Turnstile
-            <Header.Subheader>
-              用以支持用户校验，
-              <a
-                href='https://dash.cloudflare.com/'
-                target='_blank'
-                rel='noreferrer'
-              >
-                点击此处
-              </a>
-              管理你的 Turnstile Sites，推荐选择 Invisible Widget Type
-            </Header.Subheader>
-          </Header>
-          <Form.Group widths={3}>
-            <Form.Input
-              label='Turnstile Site Key'
-              name='TurnstileSiteKey'
-              onChange={handleInputChange}
-              autoComplete='new-password'
-              value={inputs.TurnstileSiteKey}
-              placeholder='输入你注册的 Turnstile Site Key'
-            />
-            <Form.Input
-              label='Turnstile Secret Key'
-              name='TurnstileSecretKey'
-              onChange={handleInputChange}
-              type='password'
-              autoComplete='new-password'
-              value={inputs.TurnstileSecretKey}
-              placeholder='敏感信息不会发送到前端显示'
-            />
-          </Form.Group>
-          <Form.Button onClick={submitTurnstile}>
-            保存 Turnstile 设置
           </Form.Button>
         </Form>
       </Grid.Column>

@@ -103,8 +103,8 @@ export default function SettingsMagnification(props) {
         style={{ marginBottom: 15 }}
       >
         <Form.Section text={'倍率设置'}>
-          <Row gutter={16}>
-            <Col span={16}>
+          <Row gutter={24}>
+            <Col span={24}>
               <Form.TextArea
                 label={'模型固定价格'}
                 extraText={'一次调用消耗多少刀，优先级大于模型倍率'}
@@ -132,8 +132,8 @@ export default function SettingsMagnification(props) {
               />
             </Col>
           </Row>
-          <Row gutter={16}>
-            <Col span={16}>
+          <Row gutter={24}>
+            <Col span={24}>
               <Form.TextArea
                 label={'模型倍率'}
                 extraText={''}
@@ -159,8 +159,8 @@ export default function SettingsMagnification(props) {
               />
             </Col>
           </Row>
-          <Row gutter={16}>
-            <Col span={16}>
+          <Row gutter={24}>
+            <Col span={24}>
               <Form.TextArea
                 label={'模型补全倍率（仅对自定义模型有效）'}
                 extraText={'仅对自定义模型有效'}
@@ -186,8 +186,8 @@ export default function SettingsMagnification(props) {
               />
             </Col>
           </Row>
-          <Row gutter={16}>
-            <Col span={16}>
+          <Row gutter={24}>
+            <Col span={24}>
               <Form.TextArea
                 label={'分组倍率'}
                 extraText={''}

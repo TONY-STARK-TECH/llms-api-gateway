@@ -2,17 +2,16 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserContext } from '../context/User';
 import { StatusContext } from '../context/Status';
+import { Nav, Button } from '@douyinfe/semi-ui';
 
 import {
   API,
-  getLogo,
-  getSystemName,
   isAdmin,
   isMobile,
   showError,
+  showSuccess,
 } from '../helpers';
 import '../index.css';
-
 import {
   IconCalendarClock, IconChecklistStroked,
   IconComment,
@@ -27,10 +26,8 @@ import {
   IconSetting,
   IconUser,
 } from '@douyinfe/semi-icons';
-import { Layout, Nav } from '@douyinfe/semi-ui';
+import { Layout } from '@douyinfe/semi-ui';
 import { setStatusData } from '../helpers/data.js';
-
-// HeaderBar Buttons
 
 const SiderBar = () => {
   const [userState, userDispatch] = useContext(UserContext);
@@ -38,13 +35,12 @@ const SiderBar = () => {
   const defaultIsCollapsed =
     isMobile() || localStorage.getItem('default_collapse_sidebar') === 'true';
 
-  let navigate = useNavigate();
   const [selectedKeys, setSelectedKeys] = useState(['home']);
-  const systemName = getSystemName();
-  const logo = getLogo();
   const [isCollapsed, setIsCollapsed] = useState(defaultIsCollapsed);
 
   const routerMap = {
+    login: '/login',
+    register: '/register',
     home: '/',
     channel: '/channel',
     token: '/token',
@@ -54,7 +50,6 @@ const SiderBar = () => {
     log: '/log',
     midjourney: '/midjourney',
     setting: '/setting',
-    about: '/about',
     chat: '/chat',
     detail: '/detail',
     pricing: '/pricing',
@@ -159,12 +154,6 @@ const SiderBar = () => {
         to: '/setting',
         icon: <IconSetting />,
       },
-      // {
-      //     text: '关于',
-      //     itemKey: 'about',
-      //     to: '/about',
-      //     icon: <IconAt/>
-      // }
     ],
     [
       localStorage.getItem('enable_data_export'),
@@ -174,6 +163,16 @@ const SiderBar = () => {
       isAdmin(),
     ],
   );
+
+  let navigate = useNavigate();
+
+  const logout = async () => {
+    API.get('/api/user/logout');
+    showSuccess('注销成功!');
+    userDispatch({ type: 'logout' });
+    localStorage.removeItem('user');
+    navigate('/login');
+  }
 
   const loadStatus = async () => {
     const res = await API.get('/api/status');
@@ -206,10 +205,8 @@ const SiderBar = () => {
   return (
     <>
       <Layout>
-        <div style={{ height: '100%' }}>
-          <Nav
-            // bodyStyle={{ maxWidth: 200 }}
-            style={{ maxWidth: 200 }}
+        <Nav
+            mode = "horizontal"
             defaultIsCollapsed={
               isMobile() ||
               localStorage.getItem('default_collapse_sidebar') === 'true'
@@ -233,19 +230,12 @@ const SiderBar = () => {
             onSelect={(key) => {
               setSelectedKeys([key.itemKey]);
             }}
-            header={{
-              logo: (
-                <img src={logo} alt='logo' style={{ marginRight: '0.75em' }} />
-              ),
-              text: systemName,
-            }}
-            // footer={{
-            //   text: '© 2021 NekoAPI',
-            // }}
-          >
-            <Nav.Footer collapseButton={true}></Nav.Footer>
-          </Nav>
-        </div>
+            footer={
+              <>
+                {userState.user && <Button onClick={logout}>退出</Button>}
+              </>
+            }
+          />
       </Layout>
     </>
   );

@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { API, isMobile, showError, showInfo, showSuccess } from '../../helpers';
+import { API, showError, showInfo, showSuccess } from '../../helpers';
 import {
-  renderNumber,
   renderQuota,
   renderQuotaWithAmount,
 } from '../../helpers/render';
 import {
-  Col,
   Layout,
-  Row,
-  Typography,
   Card,
   Button,
   Form,
@@ -19,8 +15,6 @@ import {
   Toast,
 } from '@douyinfe/semi-ui';
 import Title from '@douyinfe/semi-ui/lib/es/typography/title';
-import Text from '@douyinfe/semi-ui/lib/es/typography/text';
-import { Link } from 'react-router-dom';
 
 const TopUp = () => {
   const [redemptionCode, setRedemptionCode] = useState('');
@@ -194,8 +188,6 @@ const TopUp = () => {
         } else {
           setAmount(0);
           Toast.error({ content: '错误：' + data, id: 'getAmount' });
-          // setTopUpCount(parseInt(res.data.count));
-          // setAmount(parseInt(data));
         }
       } else {
         showError(res);
@@ -213,9 +205,6 @@ const TopUp = () => {
   return (
     <div>
       <Layout>
-        <Layout.Header>
-          <h3>我的钱包</h3>
-        </Layout.Header>
         <Layout.Content>
           <Modal
             title='确定要充值吗'

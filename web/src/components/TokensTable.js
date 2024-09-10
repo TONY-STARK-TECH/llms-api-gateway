@@ -24,17 +24,6 @@ import {
 import { IconTreeTriangleDown } from '@douyinfe/semi-icons';
 import EditToken from '../pages/Token/EditToken';
 
-const COPY_OPTIONS = [
-  { key: 'next', text: 'ChatGPT Next Web', value: 'next' },
-  { key: 'ama', text: 'ChatGPT Web & Midjourney', value: 'ama' },
-  { key: 'opencat', text: 'OpenCat', value: 'opencat' },
-];
-
-const OPEN_LINK_OPTIONS = [
-  { key: 'ama', text: 'ChatGPT Web & Midjourney', value: 'ama' },
-  { key: 'opencat', text: 'OpenCat', value: 'opencat' },
-];
-
 function renderTimestamp(timestamp) {
   return <>{timestamp2string(timestamp)}</>;
 }
@@ -87,28 +76,6 @@ function renderStatus(status, model_limits_enabled = false) {
 }
 
 const TokensTable = () => {
-  const link_menu = [
-    {
-      node: 'item',
-      key: 'next',
-      name: 'ChatGPT Next Web',
-      onClick: () => {
-        onOpenLink('next');
-      },
-    },
-    { node: 'item', key: 'ama', name: 'AMA 问天', value: 'ama' },
-    {
-      node: 'item',
-      key: 'next-mj',
-      name: 'ChatGPT Web & Midjourney',
-      value: 'next-mj',
-      onClick: () => {
-        onOpenLink('next-mj');
-      },
-    },
-    { node: 'item', key: 'opencat', name: 'OpenCat', value: 'opencat' },
-  ];
-
   const columns = [
     {
       title: '名称',
@@ -371,16 +338,6 @@ const TokensTable = () => {
     setLoading(false);
   };
 
-  const onPaginationChange = (e, { activePage }) => {
-    (async () => {
-      if (activePage === Math.ceil(tokens.length / pageSize) + 1) {
-        // In this case we have to load more data and then append them.
-        await loadTokens(activePage - 1);
-      }
-      setActivePage(activePage);
-    })();
-  };
-
   const refresh = async () => {
     await loadTokens(activePage - 1);
   };
@@ -409,7 +366,6 @@ const TokensTable = () => {
     }
     let encodedServerAddress = encodeURIComponent(serverAddress);
     const chatLink = localStorage.getItem('chat_link');
-    const mjLink = localStorage.getItem('chat_link2');
     let defaultUrl;
 
     if (chatLink) {
@@ -418,18 +374,8 @@ const TokensTable = () => {
     }
     let url;
     switch (type) {
-      case 'ama':
-        url = `ama://set-api-key?server=${encodedServerAddress}&key=sk-${key}`;
-        break;
-      case 'opencat':
-        url = `opencat://team/join?domain=${encodedServerAddress}&token=sk-${key}`;
-        break;
       case 'lobe':
         url = `https://chat-preview.lobehub.com/?settings={"keyVaults":{"openai":{"apiKey":"sk-${key}","baseURL":"${encodedServerAddress}/v1"}}}`;
-        break;
-      case 'next-mj':
-        url =
-          mjLink + `/#/?settings={"key":"sk-${key}","url":"${serverAddress}"}`;
         break;
       default:
         if (!chatLink) {
@@ -524,20 +470,6 @@ const TokensTable = () => {
 
   const handleSearchTokenChange = async (value) => {
     setSearchToken(value.trim());
-  };
-
-  const sortToken = (key) => {
-    if (tokens.length === 0) return;
-    setLoading(true);
-    let sortedTokens = [...tokens];
-    sortedTokens.sort((a, b) => {
-      return ('' + a[key]).localeCompare(b[key]);
-    });
-    if (sortedTokens[0].id === tokens[0].id) {
-      sortedTokens.reverse();
-    }
-    setTokens(sortedTokens);
-    setLoading(false);
   };
 
   const handlePageChange = (page) => {

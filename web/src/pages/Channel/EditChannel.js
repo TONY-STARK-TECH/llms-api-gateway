@@ -23,8 +23,7 @@ import {
   Checkbox,
   Banner,
 } from '@douyinfe/semi-ui';
-import { Divider } from 'semantic-ui-react';
-import { getChannelModels, loadChannelModels } from '../../components/utils.js';
+import { getChannelModels } from '../../components/utils.js';
 import axios from 'axios';
 
 const MODEL_MAPPING_EXAMPLE = {
@@ -63,7 +62,6 @@ function type2secretPrompt(type) {
 }
 
 const EditChannel = (props) => {
-  const navigate = useNavigate();
   const channelId = props.editingChannel.id;
   const isEdit = channelId !== undefined;
   const [loading, setLoading] = useState(isEdit);
@@ -190,6 +188,10 @@ const EditChannel = (props) => {
 
 
   const fetchUpstreamModelList = async (name) => {
+    if (!inputs) {
+      showError("输入为空")
+      return;
+    }
     if (inputs["type"] !== 1) {
       showError("仅支持 OpenAI 接口格式")
       return;
@@ -205,7 +207,7 @@ const EditChannel = (props) => {
         err = true
       }
     } else {
-      if (!inputs?.["key"]) {
+      if (inputs["key"]) {
         showError("请填写密钥")
         err = true
       } else {
@@ -501,7 +503,7 @@ const EditChannel = (props) => {
                   type={'warning'}
                   description={
                     <>
-                      如果你对接的是上游One API或者New API等转发项目，请使用OpenAI类型，不要使用此类型，除非你知道你在做什么。
+                      如果你对接的是上游One API转发项目，请使用OpenAI类型，否则不要使用此类型。
                     </>
                   }
                 ></Banner>
@@ -940,20 +942,6 @@ const EditChannel = (props) => {
           >
             填入模板
           </Typography.Text>
-          {/*<div style={{ marginTop: 10 }}>*/}
-          {/*  <Typography.Text strong>*/}
-          {/*    最大请求token（0表示不限制）：*/}
-          {/*  </Typography.Text>*/}
-          {/*</div>*/}
-          {/*<Input*/}
-          {/*  label='最大请求token'*/}
-          {/*  name='max_input_tokens'*/}
-          {/*  placeholder='默认为0，表示不限制'*/}
-          {/*  onChange={(value) => {*/}
-          {/*    handleInputChange('max_input_tokens', value);*/}
-          {/*  }}*/}
-          {/*  value={inputs.max_input_tokens}*/}
-          {/*/>*/}
         </Spin>
       </SideSheet>
     </>

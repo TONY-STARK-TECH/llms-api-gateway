@@ -245,6 +245,9 @@ export const modelColorMap = {
 };
 
 export function stringToColor(str) {
+  if (!str) {
+    return "lime";
+  }
   let sum = 0;
   // 对字符串中的每个字符进行操作
   for (let i = 0; i < str.length; i++) {

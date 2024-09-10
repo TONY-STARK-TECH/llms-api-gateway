@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { initVChartSemiTheme } from '@visactor/vchart-semi-theme';
 
-import { Button, Col, Form, Layout, Row, Spin } from '@douyinfe/semi-ui';
+import { Button, Form, Layout, Spin } from '@douyinfe/semi-ui';
 import VChart from '@visactor/vchart';
 import {
   API,
@@ -15,8 +15,7 @@ import {
   modelColorMap,
   renderNumber,
   renderQuota,
-  renderQuotaNumberWithDigit,
-  stringToColor,
+  renderQuotaNumberWithDigit
 } from '../../helpers/render';
 
 const Detail = (props) => {
@@ -36,7 +35,7 @@ const Detail = (props) => {
     channel: '',
     data_export_default_time: '',
   });
-  const { username, model_name, start_timestamp, end_timestamp, channel } =
+  const { username, start_timestamp, end_timestamp } =
     inputs;
   const isAdminUser = isAdmin();
   const initialized = useRef(false);
@@ -304,21 +303,11 @@ const Detail = (props) => {
     spec_line.data[0].values = lineData;
     pieChart.updateSpec(spec_pie);
     lineChart.updateSpec(spec_line);
-
-    // pieChart.updateData('id0', pieData);
-    // lineChart.updateData('barData', lineData);
     pieChart.reLayout();
     lineChart.reLayout();
   };
 
   useEffect(() => {
-    // setDataExportDefaultTime(localStorage.getItem('data_export_default_time'));
-    // if (dataExportDefaultTime === 'day') {
-    //     // 设置开始时间为7天前
-    //     let st = timestamp2string(now.getTime() / 1000 - 86400 * 7)
-    //     inputs.start_timestamp = st;
-    //     formRef.current.formApi.setValue('start_timestamp', st);
-    // }
     if (!initialized.current) {
       initVChartSemiTheme({
         isWatchingThemeSwitch: true,
@@ -331,11 +320,8 @@ const Detail = (props) => {
   return (
     <>
       <Layout>
-        <Layout.Header>
-          <h3>数据看板</h3>
-        </Layout.Header>
         <Layout.Content>
-          <Form ref={formRef} layout='horizontal' style={{ marginTop: 10 }}>
+          <Form ref={formRef} layout='horizontal'>
             <>
               <Form.DatePicker
                 field='start_timestamp'

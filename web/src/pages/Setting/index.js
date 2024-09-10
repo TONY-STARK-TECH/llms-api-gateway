@@ -52,8 +52,7 @@ const Setting = () => {
   return (
     <div>
       <Layout>
-        <Layout.Content>
-          <Tabs
+        <Tabs
             type='line'
             activeKey={tabActiveKey}
             onChange={(key) => onChangeTab(key)}
@@ -64,7 +63,6 @@ const Setting = () => {
               </TabPane>
             ))}
           </Tabs>
-        </Layout.Content>
       </Layout>
     </div>
   );

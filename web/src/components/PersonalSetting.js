@@ -212,24 +212,6 @@ const PersonalSetting = () => {
     setShowChangePasswordModal(false);
   };
 
-  const transfer = async () => {
-    if (transferAmount < getQuotaPerUnit()) {
-      showError('划转金额最低为' + renderQuota(getQuotaPerUnit()));
-      return;
-    }
-    const res = await API.post(`/api/user/aff_transfer`, {
-      quota: transferAmount,
-    });
-    const { success, message } = res.data;
-    if (success) {
-      showSuccess(message);
-      setOpenTransfer(false);
-      getUserData().then();
-    } else {
-      showError(message);
-    }
-  };
-
   const sendVerificationCode = async () => {
     if (inputs.email === '') {
       showError('请输入邮箱！');
@@ -281,10 +263,6 @@ const PersonalSetting = () => {
     }
   };
 
-  const handleCancel = () => {
-    setOpenTransfer(false);
-  };
-
   const copyText = async (text) => {
     if (await copy(text)) {
       showSuccess('已复制：' + text);
@@ -298,39 +276,6 @@ const PersonalSetting = () => {
     <div>
       <Layout>
         <Layout.Content>
-          <Modal
-            title='请输入要划转的数量'
-            visible={openTransfer}
-            onOk={transfer}
-            onCancel={handleCancel}
-            maskClosable={false}
-            size={'small'}
-            centered={true}
-          >
-            <div style={{ marginTop: 20 }}>
-              <Typography.Text>{`可用额度${renderQuotaWithPrompt(userState?.user?.aff_quota)}`}</Typography.Text>
-              <Input
-                style={{ marginTop: 5 }}
-                value={userState?.user?.aff_quota}
-                disabled={true}
-              ></Input>
-            </div>
-            <div style={{ marginTop: 20 }}>
-              <Typography.Text>
-                {`划转额度${renderQuotaWithPrompt(transferAmount)} 最低` +
-                  renderQuota(getQuotaPerUnit())}
-              </Typography.Text>
-              <div>
-                <InputNumber
-                  min={0}
-                  style={{ marginTop: 5 }}
-                  value={transferAmount}
-                  onChange={(value) => setTransferAmount(value)}
-                  disabled={false}
-                ></InputNumber>
-              </div>
-            </div>
-          </Modal>
           <div style={{ marginTop: 20 }}>
             <Card
               title={
@@ -372,7 +317,7 @@ const PersonalSetting = () => {
                     {renderQuota(userState?.user?.used_quota)}
                   </Descriptions.Item>
                   <Descriptions.Item itemKey='请求次数'>
-                    {userState.user?.request_count}
+                    {userState?.user?.request_count}
                   </Descriptions.Item>
                 </Descriptions>
               }
@@ -394,44 +339,6 @@ const PersonalSetting = () => {
                 </Space>
               </div>
             </Card>
-            <Card
-              footer={
-                <div>
-                  <Typography.Text>邀请链接</Typography.Text>
-                  <Input
-                    style={{ marginTop: 10 }}
-                    value={affLink}
-                    onClick={handleAffLinkClick}
-                    readOnly
-                  />
-                </div>
-              }
-            >
-              <Typography.Title heading={6}>邀请信息</Typography.Title>
-              <div style={{ marginTop: 10 }}>
-                <Descriptions row>
-                  <Descriptions.Item itemKey='待使用收益'>
-                    <span style={{ color: 'rgba(var(--semi-red-5), 1)' }}>
-                      {renderQuota(userState?.user?.aff_quota)}
-                    </span>
-                    <Button
-                      type={'secondary'}
-                      onClick={() => setOpenTransfer(true)}
-                      size={'small'}
-                      style={{ marginLeft: 10 }}
-                    >
-                      划转
-                    </Button>
-                  </Descriptions.Item>
-                  <Descriptions.Item itemKey='总收益'>
-                    {renderQuota(userState?.user?.aff_history_quota)}
-                  </Descriptions.Item>
-                  <Descriptions.Item itemKey='邀请人数'>
-                    {userState?.user?.aff_count}
-                  </Descriptions.Item>
-                </Descriptions>
-              </div>
-            </Card>
             <Card>
               <Typography.Title heading={6}>个人信息</Typography.Title>
               <div style={{ marginTop: 20 }}>
@@ -442,7 +349,7 @@ const PersonalSetting = () => {
                   <div>
                     <Input
                       value={
-                        userState.user && userState.user.email !== ''
+                        userState?.user && userState.user.email !== ''
                           ? userState.user.email
                           : '未绑定'
                       }
@@ -455,103 +362,13 @@ const PersonalSetting = () => {
                         setShowEmailBindModal(true);
                       }}
                     >
-                      {userState.user && userState.user.email !== ''
+                      {userState?.user && userState.user.email !== ''
                         ? '修改绑定'
                         : '绑定邮箱'}
                     </Button>
                   </div>
                 </div>
               </div>
-              <div style={{ marginTop: 10 }}>
-                <Typography.Text strong>微信</Typography.Text>
-                <div
-                  style={{ display: 'flex', justifyContent: 'space-between' }}
-                >
-                  <div>
-                    <Input
-                      value={
-                        userState.user && userState.user.wechat_id !== ''
-                          ? '已绑定'
-                          : '未绑定'
-                      }
-                      readonly={true}
-                    ></Input>
-                  </div>
-                  <div>
-                    <Button
-                      disabled={
-                        (userState.user && userState.user.wechat_id !== '') ||
-                        !status.wechat_login
-                      }
-                    >
-                      {status.wechat_login ? '绑定' : '未启用'}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              <div style={{ marginTop: 10 }}>
-                <Typography.Text strong>GitHub</Typography.Text>
-                <div
-                  style={{ display: 'flex', justifyContent: 'space-between' }}
-                >
-                  <div>
-                    <Input
-                      value={
-                        userState.user && userState.user.github_id !== ''
-                          ? userState.user.github_id
-                          : '未绑定'
-                      }
-                      readonly={true}
-                    ></Input>
-                  </div>
-                  <div>
-                    <Button
-                      onClick={() => {
-                        onGitHubOAuthClicked(status.github_client_id);
-                      }}
-                      disabled={
-                        (userState.user && userState.user.github_id !== '') ||
-                        !status.github_oauth
-                      }
-                    >
-                      {status.github_oauth ? '绑定' : '未启用'}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ marginTop: 10 }}>
-                <Typography.Text strong>Telegram</Typography.Text>
-                <div
-                  style={{ display: 'flex', justifyContent: 'space-between' }}
-                >
-                  <div>
-                    <Input
-                      value={
-                        userState.user && userState.user.telegram_id !== ''
-                          ? userState.user.telegram_id
-                          : '未绑定'
-                      }
-                      readonly={true}
-                    ></Input>
-                  </div>
-                  <div>
-                    {status.telegram_oauth ? (
-                      userState.user.telegram_id !== '' ? (
-                        <Button disabled={true}>已绑定</Button>
-                      ) : (
-                        <TelegramLoginButton
-                          dataAuthUrl='/api/oauth/telegram/bind'
-                          botName={status.telegram_bot_name}
-                        />
-                      )
-                    ) : (
-                      <Button disabled={true}>未启用</Button>
-                    )}
-                  </div>
-                </div>
-              </div>
-
               <div style={{ marginTop: 10 }}>
                 <Space>
                   <Button onClick={generateAccessToken}>
