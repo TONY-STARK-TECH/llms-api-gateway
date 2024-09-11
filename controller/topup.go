@@ -99,7 +99,7 @@ func RequestPay(c *gin.Context) {
     Set("notify_url", callBackAddress).
     Set("trade_type", wechat.TradeType_Native).
     Set("sign_type", wechat.SignType_MD5).
-	Set("spbill_create_ip", "47.120.40.92")
+	Set("spbill_create_ip", c.ClientIP())
 
 	wxRsp, err := client.UnifiedOrder(c, bm)
 
@@ -173,7 +173,7 @@ func PayNotify(c *gin.Context) {
 	client := GetPayClient()
 
 	if client == nil {
-		log.Println("回调失败 未找到配置信息")
+		common.SysLog("回调失败 未找到配置信息")
 		rsp.ReturnCode = gopay.FAIL
 		rsp.ReturnMsg = gopay.FAIL
 		// 此写法是 gin 框架返回微信的写法
@@ -182,10 +182,20 @@ func PayNotify(c *gin.Context) {
 	}
 
 	notifyReq, err := wechat.ParseNotifyToBodyMap(c.Request)
+
+	if err != nil {
+		common.SysLog("参数解析失败")
+		rsp.ReturnCode = gopay.FAIL
+		rsp.ReturnMsg = "参数解析失败"
+		// 此写法是 gin 框架返回微信的写法
+		c.String(http.StatusBadRequest, "%s", rsp.ToXmlString())
+		return
+	}
+
 	ok, err := wechat.VerifySign(constant.WeChatApiV2Password, wechat.SignType_MD5, notifyReq)
 
 	if err != nil {
-		log.Println("回调签名验证失败")
+		common.SysLog("回调签名验证失败")
 		rsp.ReturnCode = gopay.FAIL
 		rsp.ReturnMsg = "回调签名验证失败"
 		// 此写法是 gin 框架返回微信的写法
@@ -194,14 +204,14 @@ func PayNotify(c *gin.Context) {
 	}
 
 	if ok {
-		OutTradeNo := notifyReq.Get("OutTradeNo")
+		OutTradeNo := notifyReq.Get("out_trade_no")
 		defer UnlockOrder(OutTradeNo)
 		topUp := model.GetTopUpByTradeNo(OutTradeNo)
 
 		if topUp == nil {
 			rsp.ReturnCode = gopay.FAIL
 			rsp.ReturnMsg = "支付回调未找到订单"
-			log.Printf("支付回调未找到订单: %v", OutTradeNo)
+			common.SysLog("支付回调未找到订单: " + OutTradeNo)
 			c.String(http.StatusOK, "%s", rsp.ToXmlString())
 			return
 		}
@@ -213,7 +223,7 @@ func PayNotify(c *gin.Context) {
 			if err != nil {
 				rsp.ReturnCode = gopay.FAIL
 				rsp.ReturnMsg = "支付回调更新订单失败"
-				log.Printf("支付回调更新订单失败: %v", topUp)
+				common.SysLog("支付回调更新订单失败: " + topUp.TradeNo)
 				c.String(http.StatusOK, "%s", rsp.ToXmlString())
 				return
 			}
@@ -222,12 +232,12 @@ func PayNotify(c *gin.Context) {
 			if err != nil {
 				rsp.ReturnCode = gopay.FAIL
 				rsp.ReturnMsg = "支付回调更新用户失败"
-				log.Printf("支付回调更新用户失败: %v", topUp)
+				common.SysLog("支付回调更新用户失败:" + topUp.TradeNo)
 				c.String(http.StatusOK, "%s", rsp.ToXmlString())
 				return
 			}
 
-			log.Printf("支付回调更新用户成功 %v", topUp)
+			common.SysLog("支付回调成功")
 			model.RecordLog(topUp.UserId, model.LogTypeTopup, fmt.Sprintf("使用在线充值成功，充值金额: %v，支付金额：%f", common.LogQuota(topUp.Amount*int(common.QuotaPerUnit)), topUp.Money))
 		}
 		rsp.ReturnCode = gopay.SUCCESS

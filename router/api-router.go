@@ -30,7 +30,7 @@ func SetApiRouter(router *gin.Engine) {
 		apiRouter.GET("/oauth/email/bind", middleware.CriticalRateLimit(), middleware.UserAuth(), controller.EmailBind)
 		apiRouter.GET("/oauth/telegram/login", middleware.CriticalRateLimit(), controller.TelegramLogin)
 		apiRouter.GET("/oauth/telegram/bind", middleware.CriticalRateLimit(), middleware.UserAuth(), controller.TelegramBind)
-		apiRouter.GET("/pay/notify", controller.PayNotify)
+		apiRouter.POST("/pay/notify", controller.PayNotify)
 
 		userRoute := apiRouter.Group("/user")
 		{

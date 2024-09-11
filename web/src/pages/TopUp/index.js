@@ -58,7 +58,7 @@ const TopUp = () => {
         if (message === 'success') {
           setTopUpLink(data);
         } else {
-          showError(res);
+          showError(message);
         }
       } else {
         showError(res);

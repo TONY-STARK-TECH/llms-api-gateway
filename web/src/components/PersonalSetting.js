@@ -335,7 +335,7 @@ const PersonalSetting = () => {
                     修改密码
                   </Button>
                 </Space>
-                <Space>
+                {/* <Space>
                   <Button
                       style={{marginLeft: 8}}
                       onClick={() => {
@@ -344,7 +344,7 @@ const PersonalSetting = () => {
                     >
                       绑定微信账号
                   </Button>
-                </Space>
+                </Space> */}
                 <Modal
                   onCancel={() => setShowWeChatBindModal(false)}
                   visible={showWeChatBindModal}
