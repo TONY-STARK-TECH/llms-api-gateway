@@ -15,14 +15,14 @@ import { ThemeProvider } from './context/Theme';
 import DisableDevtool from 'disable-devtool';
 
 // initialization
-// DisableDevtool({
-//   ondevtoolopen(type, next){
-//     console.log('我们已经记录下了你的 IP 地址，不要干坏事儿！');
-//     next();
-//   },
-//   timeOutUrl: "https://fastx-ai.com",
-//   rewriteHTML: "为确保网站安全，我们已经记录下了你的 IP 地址，请立即关闭调试工具"
-// });
+DisableDevtool({
+  ondevtoolopen(type, next){
+    console.log('我们已经记录下了你的 IP 地址，不要干坏事儿！');
+    next();
+  },
+  timeOutUrl: "https://fastx-ai.com",
+  rewriteHTML: "为确保网站安全，我们已经记录下了你的 IP 地址，请立即关闭调试工具"
+});
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 const { Content, Header } = Layout;

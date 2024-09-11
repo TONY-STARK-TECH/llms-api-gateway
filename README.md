@@ -76,3 +76,7 @@
 ## 相关项目
 
 + [neko-api-key-tool](https://github.com/Calcium-Ion/neko-api-key-tool)：用key查询使用额度
+
+```shell
+env GOOS=linux GOARCH=amd64  CGO_ENABLED=0 go build -ldflags "-s -w" -o api-server
+```

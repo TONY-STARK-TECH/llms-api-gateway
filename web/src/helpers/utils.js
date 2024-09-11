@@ -23,7 +23,7 @@ export function isRoot() {
 
 export function getSystemName() {
   let system_name = localStorage.getItem('system_name');
-  if (!system_name) return 'New API';
+  if (!system_name) return '光子人工智能 API';
   return system_name;
 }
 
