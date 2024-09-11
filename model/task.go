@@ -8,16 +8,14 @@ import (
 	"time"
 )
 
-type TaskStatus string
-
 const (
-	TaskStatusNotStart   TaskStatus = "NOT_START"
-	TaskStatusSubmitted  TaskStatus = "SUBMITTED"
-	TaskStatusQueued     TaskStatus = "QUEUED"
-	TaskStatusInProgress TaskStatus = "IN_PROGRESS"
-	TaskStatusFailure    TaskStatus = "FAILURE"
-	TaskStatusSuccess    TaskStatus = "SUCCESS"
-	TaskStatusUnknown    TaskStatus = "UNKNOWN"
+	TaskStatusNotStart    = "NOT_START"
+	TaskStatusSubmitted   = "SUBMITTED"
+	TaskStatusQueued      = "QUEUED"
+	TaskStatusInProgress  = "IN_PROGRESS"
+	TaskStatusFailure     = "FAILURE"
+	TaskStatusSuccess     = "SUCCESS"
+	TaskStatusUnknown     = "UNKNOWN"
 )
 
 type Task struct {
@@ -30,7 +28,7 @@ type Task struct {
 	ChannelId  int                   `json:"channel_id" gorm:"index"`
 	Quota      int                   `json:"quota"`
 	Action     string                `json:"action" gorm:"type:varchar(40);index"` // 任务类型, song, lyrics, description-mode
-	Status     TaskStatus            `json:"status" gorm:"type:varchar(20);index"` // 任务状态
+	Status     string            `json:"status" gorm:"type:varchar(20);index"` // 任务状态
 	FailReason string                `json:"fail_reason"`
 	SubmitTime int64                 `json:"submit_time" gorm:"index"`
 	StartTime  int64                 `json:"start_time" gorm:"index"`

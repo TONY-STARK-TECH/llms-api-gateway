@@ -143,7 +143,7 @@ func updateSunoTaskAll(ctx context.Context, channelId int, taskIds []string, tas
 			continue
 		}
 
-		task.Status = lo.If(model.TaskStatus(responseItem.Status) != "", model.TaskStatus(responseItem.Status)).Else(task.Status)
+		task.Status = lo.If(string(responseItem.Status) != "", string(responseItem.Status)).Else(task.Status)
 		task.FailReason = lo.If(responseItem.FailReason != "", responseItem.FailReason).Else(task.FailReason)
 		task.SubmitTime = lo.If(responseItem.SubmitTime != 0, responseItem.SubmitTime).Else(task.SubmitTime)
 		task.StartTime = lo.If(responseItem.StartTime != 0, responseItem.StartTime).Else(task.StartTime)
@@ -166,7 +166,7 @@ func updateSunoTaskAll(ctx context.Context, channelId int, taskIds []string, tas
 				}
 			}
 		}
-		if responseItem.Status == model.TaskStatusSuccess {
+		if responseItem.Status == model.TaskStatusSuccess  {
 			task.Progress = "100%"
 		}
 		task.Data = responseItem.Data
