@@ -1,10 +1,12 @@
+<img width="1379" alt="image" src="https://github.com/user-attachments/assets/2ff4198b-3468-4ab6-8312-5efec672ccf9">
+
 # 主要变更
 
 此分叉版本的主要变更如下：
 
-1. 全新的 `UI` 界面
+1. 极简 `UI` 界面
 2. 移除 `不必要` 的功能
-3. 支持在线充值功能，可在系统设置中设置
+3. 支持微信支付，配置即可使用
 
 ## 模型支持
 
