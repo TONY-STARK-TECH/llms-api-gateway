@@ -2,19 +2,16 @@ package controller
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"one-api/common"
 	"one-api/constant"
 	"one-api/dto"
 	"one-api/model"
 	"one-api/relay"
-	"one-api/relay/channel/ai360"
-	"one-api/relay/channel/lingyiwanwu"
-	"one-api/relay/channel/minimax"
-	"one-api/relay/channel/moonshot"
 	relaycommon "one-api/relay/common"
 	relayconstant "one-api/relay/constant"
+
+	"github.com/gin-gonic/gin"
 )
 
 // https://platform.openai.com/docs/api-reference/models/list
@@ -63,50 +60,6 @@ func init() {
 				Parent:     nil,
 			})
 		}
-	}
-	for _, modelName := range ai360.ModelList {
-		openAIModels = append(openAIModels, dto.OpenAIModels{
-			Id:         modelName,
-			Object:     "model",
-			Created:    1626777600,
-			OwnedBy:    ai360.ChannelName,
-			Permission: permission,
-			Root:       modelName,
-			Parent:     nil,
-		})
-	}
-	for _, modelName := range moonshot.ModelList {
-		openAIModels = append(openAIModels, dto.OpenAIModels{
-			Id:         modelName,
-			Object:     "model",
-			Created:    1626777600,
-			OwnedBy:    moonshot.ChannelName,
-			Permission: permission,
-			Root:       modelName,
-			Parent:     nil,
-		})
-	}
-	for _, modelName := range lingyiwanwu.ModelList {
-		openAIModels = append(openAIModels, dto.OpenAIModels{
-			Id:         modelName,
-			Object:     "model",
-			Created:    1626777600,
-			OwnedBy:    lingyiwanwu.ChannelName,
-			Permission: permission,
-			Root:       modelName,
-			Parent:     nil,
-		})
-	}
-	for _, modelName := range minimax.ModelList {
-		openAIModels = append(openAIModels, dto.OpenAIModels{
-			Id:         modelName,
-			Object:     "model",
-			Created:    1626777600,
-			OwnedBy:    minimax.ChannelName,
-			Permission: permission,
-			Root:       modelName,
-			Parent:     nil,
-		})
 	}
 	for modelName, _ := range constant.MidjourneyModel2Action {
 		openAIModels = append(openAIModels, dto.OpenAIModels{
