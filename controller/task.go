@@ -21,7 +21,6 @@ import (
 )
 
 func UpdateTaskBulk() {
-	//revocer
 	//imageModel := "midjourney"
 	for {
 		time.Sleep(time.Duration(15) * time.Second)
@@ -119,7 +118,7 @@ func updateSunoTaskAll(ctx context.Context, channelId int, taskIds []string, tas
 	}
 	if resp.StatusCode != http.StatusOK {
 		common.LogError(ctx, fmt.Sprintf("Get Task status code: %d", resp.StatusCode))
-		return errors.New(fmt.Sprintf("Get Task status code: %d", resp.StatusCode))
+		return fmt.Errorf("get Task status code: %d", resp.StatusCode)
 	}
 	defer resp.Body.Close()
 	responseBody, err := io.ReadAll(resp.Body)
@@ -134,7 +133,7 @@ func updateSunoTaskAll(ctx context.Context, channelId int, taskIds []string, tas
 		return err
 	}
 	if !responseItems.IsSuccess() {
-		common.SysLog(fmt.Sprintf("渠道 #%d 未完成的任务有: %d, 成功获取到任务数: %d", channelId, len(taskIds), string(responseBody)))
+		common.SysLog(fmt.Sprintf("渠道 #%d 未完成的任务有: %d, 成功获取到任务数: %s", channelId, len(taskIds), string(responseBody)))
 		return err
 	}
 
@@ -215,10 +214,7 @@ func checkTaskNeedUpdate(oldTask *model.Task, newTask dto.SunoDataResponse) bool
 		return newData[i] < newData[j]
 	})
 
-	if string(oldData) != string(newData) {
-		return true
-	}
-	return false
+	return string(oldData) != string(newData)
 }
 
 func GetAllTask(c *gin.Context) {

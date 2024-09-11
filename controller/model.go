@@ -61,7 +61,7 @@ func init() {
 			})
 		}
 	}
-	for modelName, _ := range constant.MidjourneyModel2Action {
+	for modelName := range constant.MidjourneyModel2Action {
 		openAIModels = append(openAIModels, dto.OpenAIModels{
 			Id:         modelName,
 			Object:     "model",

@@ -1,10 +1,11 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
 	"one-api/common"
 	"one-api/dto"
 	"one-api/model"
+
+	"github.com/gin-gonic/gin"
 )
 
 func GetSubscription(c *gin.Context) {
@@ -22,6 +23,16 @@ func GetSubscription(c *gin.Context) {
 	} else {
 		userId := c.GetInt("id")
 		remainQuota, err = model.GetUserQuota(userId)
+		if err != nil {
+			openAIError := dto.OpenAIError{
+				Message: err.Error(),
+				Type:    "upstream_error",
+			}
+			c.JSON(200, gin.H{
+				"error": openAIError,
+			})
+			return
+		}
 		usedQuota, err = model.GetUserUsedQuota(userId)
 	}
 	if expiredTime <= 0 {
@@ -54,7 +65,6 @@ func GetSubscription(c *gin.Context) {
 		AccessUntil:        expiredTime,
 	}
 	c.JSON(200, subscription)
-	return
 }
 
 func GetUsage(c *gin.Context) {
@@ -88,5 +98,4 @@ func GetUsage(c *gin.Context) {
 		TotalUsage: amount * 100,
 	}
 	c.JSON(200, usage)
-	return
 }
