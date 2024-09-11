@@ -110,8 +110,13 @@ func RequestPay(c *gin.Context) {
 
 	ok, err := wechat.VerifySign(constant.WeChatApiV2Password, wechat.SignType_MD5, wxRsp)
 
-	if err != nil || !ok {
+	if err != nil {
 		c.JSON(200, gin.H{"message": err.Error(), "data": "订单校验失败"})
+		return
+	}
+
+	if !ok {
+		c.JSON(200, gin.H{"message": "failed", "data": "订单校验失败"})
 		return
 	}
 
