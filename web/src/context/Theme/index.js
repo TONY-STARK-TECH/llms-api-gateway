@@ -9,23 +9,23 @@ export const useSetTheme = () => useContext(SetThemeContext);
 export const ThemeProvider = ({ children }) => {
   const [theme, _setTheme] = useState(() => {
     try {
-      return localStorage.getItem('theme-mode') || null;
+      return 'dark';
     } catch {
       return null;
     }
   });
 
+  // default set to dark
+  const body = document.body;
+  body.setAttribute('theme-mode', 'dark');
+  localStorage.setItem('theme-mode', 'dark');
+
   const setTheme = useCallback((input) => {
-    _setTheme(input ? 'dark' : 'light');
+    _setTheme('dark');
 
     const body = document.body;
-    if (!input) {
-      body.removeAttribute('theme-mode');
-      localStorage.setItem('theme-mode', 'light');
-    } else {
-      body.setAttribute('theme-mode', 'dark');
-      localStorage.setItem('theme-mode', 'dark');
-    }
+    body.setAttribute('theme-mode', 'dark');
+    localStorage.setItem('theme-mode', 'dark');
   }, []);
 
   return (

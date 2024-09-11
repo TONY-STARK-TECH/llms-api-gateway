@@ -12,8 +12,10 @@ import { StatusProvider } from './context/Status';
 import { Layout } from '@douyinfe/semi-ui';
 import SiderBar from './components/SiderBar';
 import { ThemeProvider } from './context/Theme';
+import DisableDevtool from 'disable-devtool';
 
 // initialization
+DisableDevtool();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 const { Content, Header } = Layout;

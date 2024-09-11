@@ -9,7 +9,6 @@ import {
   Card,
   Button,
   Form,
-  Divider,
   Space,
   Modal,
   Toast,
@@ -29,46 +28,6 @@ const TopUp = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
   const [payWay, setPayWay] = useState('');
-
-  const topUp = async () => {
-    if (redemptionCode === '') {
-      showInfo('请输入兑换码！');
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      const res = await API.post('/api/user/topup', {
-        key: redemptionCode,
-      });
-      const { success, message, data } = res.data;
-      if (success) {
-        showSuccess('兑换成功！');
-        Modal.success({
-          title: '兑换成功！',
-          content: '成功兑换额度：' + renderQuota(data),
-          centered: true,
-        });
-        setUserQuota((quota) => {
-          return quota + data;
-        });
-        setRedemptionCode('');
-      } else {
-        showError(message);
-      }
-    } catch (err) {
-      showError('请求失败');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const openTopUpLink = () => {
-    if (!topUpLink) {
-      showError('超级管理员未设置充值链接！');
-      return;
-    }
-    window.open(topUpLink, '_blank');
-  };
 
   const preTopUp = async (payment) => {
     if (!enableOnlineTopUp) {
@@ -222,56 +181,27 @@ const TopUp = () => {
           <div
             style={{ marginTop: 20, display: 'flex', justifyContent: 'center' }}
           >
-            <Card style={{ width: '500px', padding: '20px' }}>
+            <Card style={{ width: '100%' }}>
               <Title level={3} style={{ textAlign: 'center' }}>
-                余额 {renderQuota(userQuota)}
+                可用: {renderQuota(userQuota)}
               </Title>
-              <div style={{ marginTop: 20 }}>
-                <Divider>兑换余额</Divider>
-                <Form>
-                  <Form.Input
-                    field={'redemptionCode'}
-                    label={'兑换码'}
-                    placeholder='兑换码'
-                    name='redemptionCode'
-                    value={redemptionCode}
-                    onChange={(value) => {
-                      setRedemptionCode(value);
-                    }}
-                  />
-                  <Space>
-                    {topUpLink ? (
-                      <Button
-                        type={'primary'}
-                        theme={'solid'}
-                        onClick={openTopUpLink}
-                      >
-                        获取兑换码
-                      </Button>
-                    ) : null}
-                    <Button
-                      type={'warning'}
-                      theme={'solid'}
-                      onClick={topUp}
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? '兑换中...' : '兑换'}
-                    </Button>
-                  </Space>
-                </Form>
-              </div>
-              <div style={{ marginTop: 20 }}>
-                <Divider>在线充值</Divider>
-                <Form>
-                  <Form.Input
+              <div style={{ marginTop: 30, width: "100%", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
+                <Form layout='horizontal'>
+                  <Form.InputNumber
                     disabled={!enableOnlineTopUp}
                     field={'redemptionCount'}
-                    label={'实付金额：' + renderAmount()}
+                    label={'实付：' + renderAmount()}
+                    labelPosition={"inset"}
+                    style={{
+                      color: "#FF6A00",
+                      fontSize:  18,
+                      fontWeight: 1000,
+                    }}
                     placeholder={
                       '充值数量，最低 ' + renderQuotaWithAmount(minTopUp)
                     }
                     name='redemptionCount'
-                    type={'number'}
+                    suffix={"$"}
                     value={topUpCount}
                     onChange={async (value) => {
                       if (value < 1) {
@@ -283,15 +213,6 @@ const TopUp = () => {
                   />
                   <Space>
                     <Button
-                      type={'primary'}
-                      theme={'solid'}
-                      onClick={async () => {
-                        preTopUp('zfb');
-                      }}
-                    >
-                      支付宝
-                    </Button>
-                    <Button
                       style={{
                         backgroundColor: 'rgba(var(--semi-green-5), 1)',
                       }}
@@ -301,20 +222,14 @@ const TopUp = () => {
                         preTopUp('wx');
                       }}
                     >
-                      微信
+                      微信支付
                     </Button>
                   </Space>
                 </Form>
+                <p style={{
+                  marginTop: 10
+                }}>充值成功后，请刷新界面查看余额</p>
               </div>
-              {/*<div style={{ display: 'flex', justifyContent: 'right' }}>*/}
-              {/*    <Text>*/}
-              {/*        <Link onClick={*/}
-              {/*            async () => {*/}
-              {/*                window.location.href = '/topup/history'*/}
-              {/*            }*/}
-              {/*        }>充值记录</Link>*/}
-              {/*    </Text>*/}
-              {/*</div>*/}
             </Card>
           </div>
         </Layout.Content>

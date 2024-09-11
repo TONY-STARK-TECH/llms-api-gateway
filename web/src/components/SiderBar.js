@@ -12,20 +12,6 @@ import {
   showSuccess,
 } from '../helpers';
 import '../index.css';
-import {
-  IconCalendarClock, IconChecklistStroked,
-  IconComment,
-  IconCreditCard,
-  IconGift,
-  IconHistogram,
-  IconHome,
-  IconImage,
-  IconKey,
-  IconLayers,
-  IconPriceTag,
-  IconSetting,
-  IconUser,
-} from '@douyinfe/semi-icons';
 import { Layout } from '@douyinfe/semi-ui';
 import { setStatusData } from '../helpers/data.js';
 
@@ -62,20 +48,17 @@ const SiderBar = () => {
         text: '首页',
         itemKey: 'home',
         to: '/',
-        icon: <IconHome />,
       },
       {
         text: '渠道',
         itemKey: 'channel',
         to: '/channel',
-        icon: <IconLayers />,
         className: isAdmin() ? 'semi-navigation-item-normal' : 'tableHiddle',
       },
       {
         text: '聊天',
         itemKey: 'chat',
         to: '/chat',
-        icon: <IconComment />,
         className: localStorage.getItem('chat_link')
           ? 'semi-navigation-item-normal'
           : 'tableHiddle',
@@ -84,45 +67,38 @@ const SiderBar = () => {
         text: '令牌',
         itemKey: 'token',
         to: '/token',
-        icon: <IconKey />,
       },
       {
         text: '兑换码',
         itemKey: 'redemption',
         to: '/redemption',
-        icon: <IconGift />,
         className: isAdmin() ? 'semi-navigation-item-normal' : 'tableHiddle',
       },
       {
         text: '钱包',
         itemKey: 'topup',
         to: '/topup',
-        icon: <IconCreditCard />,
       },
       {
-        text: '模型价格',
+        text: '模型',
         itemKey: 'pricing',
         to: '/pricing',
-        icon: <IconPriceTag />,
       },
       {
         text: '用户管理',
         itemKey: 'user',
         to: '/user',
-        icon: <IconUser />,
         className: isAdmin() ? 'semi-navigation-item-normal' : 'tableHiddle',
       },
       {
         text: '日志',
         itemKey: 'log',
         to: '/log',
-        icon: <IconHistogram />,
       },
       {
-        text: '数据看板',
+        text: '数据',
         itemKey: 'detail',
         to: '/detail',
-        icon: <IconCalendarClock />,
         className:
           localStorage.getItem('enable_data_export') === 'true'
             ? 'semi-navigation-item-normal'
@@ -132,17 +108,15 @@ const SiderBar = () => {
         text: '绘图',
         itemKey: 'midjourney',
         to: '/midjourney',
-        icon: <IconImage />,
         className:
           localStorage.getItem('enable_drawing') === 'true'
             ? 'semi-navigation-item-normal'
             : 'tableHiddle',
       },
       {
-        text: '异步任务',
+        text: '任务',
         itemKey: 'task',
         to: '/task',
-        icon: <IconChecklistStroked />,
         className:
             localStorage.getItem('enable_task') === 'true'
                 ? 'semi-navigation-item-normal'
@@ -152,7 +126,6 @@ const SiderBar = () => {
         text: '设置',
         itemKey: 'setting',
         to: '/setting',
-        icon: <IconSetting />,
       },
     ],
     [

@@ -136,11 +136,11 @@ var (
 // All duration's unit is seconds
 // Shouldn't larger then RateLimitKeyExpirationDuration
 var (
-	GlobalApiRateLimitNum            = GetEnvOrDefault("GLOBAL_API_RATE_LIMIT", 180)
-	GlobalApiRateLimitDuration int64 = 3 * 60
+	GlobalApiRateLimitNum            = GetEnvOrDefault("GLOBAL_API_RATE_LIMIT", 600)
+	GlobalApiRateLimitDuration int64 = 1 * 60
 
-	GlobalWebRateLimitNum            = GetEnvOrDefault("GLOBAL_WEB_RATE_LIMIT", 60)
-	GlobalWebRateLimitDuration int64 = 3 * 60
+	GlobalWebRateLimitNum            = GetEnvOrDefault("GLOBAL_WEB_RATE_LIMIT", 600)
+	GlobalWebRateLimitDuration int64 = 1 * 60
 
 	UploadRateLimitNum            = 10
 	UploadRateLimitDuration int64 = 60

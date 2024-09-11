@@ -9,8 +9,8 @@ const Token = () => (
       </Layout.Content>
       <Layout.Footer>
         <Banner
-          type='danger'
-          description='令牌无法精确控制使用额度，请勿直接将令牌分发给用户。'
+          type='info'
+          description='令牌无法精确控制使用额度，请勿随意将令牌分发给其他用户。'
         />
       </Layout.Footer>
     </Layout>

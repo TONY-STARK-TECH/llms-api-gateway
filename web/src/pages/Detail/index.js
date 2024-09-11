@@ -188,45 +188,39 @@ const Detail = (props) => {
 
   const loadQuotaData = async (lineChart, pieChart) => {
     setLoading(true);
-
-    let url = '';
-    let localStartTimestamp = Date.parse(start_timestamp) / 1000;
-    let localEndTimestamp = Date.parse(end_timestamp) / 1000;
-    if (isAdminUser) {
-      url = `/api/data/?username=${username}&start_timestamp=${localStartTimestamp}&end_timestamp=${localEndTimestamp}&default_time=${dataExportDefaultTime}`;
-    } else {
-      url = `/api/data/self/?start_timestamp=${localStartTimestamp}&end_timestamp=${localEndTimestamp}&default_time=${dataExportDefaultTime}`;
-    }
-    const res = await API.get(url);
-    const { success, message, data } = res.data;
-    if (success) {
-      setQuotaData(data);
-      if (data.length === 0) {
-        data.push({
-          count: 0,
-          model_name: '无数据',
-          quota: 0,
-          created_at: now.getTime() / 1000,
+    try {
+      let url = '';
+      let localStartTimestamp = Date.parse(start_timestamp) / 1000;
+      let localEndTimestamp = Date.parse(end_timestamp) / 1000;
+      if (isAdminUser) {
+        url = `/api/data/?username=${username}&start_timestamp=${localStartTimestamp}&end_timestamp=${localEndTimestamp}&default_time=${dataExportDefaultTime}`;
+      } else {
+        url = `/api/data/self/?start_timestamp=${localStartTimestamp}&end_timestamp=${localEndTimestamp}&default_time=${dataExportDefaultTime}`;
+      }
+      const res = await API.get(url);
+      const { success, message, data } = res.data;
+      if (success) {
+        setQuotaData(data);
+        // 根据dataExportDefaultTime重制时间粒度
+        let timeGranularity = 3600;
+        if (dataExportDefaultTime === 'day') {
+          timeGranularity = 86400;
+        } else if (dataExportDefaultTime === 'week') {
+          timeGranularity = 604800;
+        }
+        // sort created_at
+        data.sort((a, b) => a.created_at - b.created_at);
+        data.forEach((item) => {
+          item['created_at'] =
+            Math.floor(item['created_at'] / timeGranularity) * timeGranularity;
         });
+        updateChart(lineChart, pieChart, data);
+      } else {
+        showError(message);
       }
-      // 根据dataExportDefaultTime重制时间粒度
-      let timeGranularity = 3600;
-      if (dataExportDefaultTime === 'day') {
-        timeGranularity = 86400;
-      } else if (dataExportDefaultTime === 'week') {
-        timeGranularity = 604800;
-      }
-      // sort created_at
-      data.sort((a, b) => a.created_at - b.created_at);
-      data.forEach((item) => {
-        item['created_at'] =
-          Math.floor(item['created_at'] / timeGranularity) * timeGranularity;
-      });
-      updateChart(lineChart, pieChart, data);
-    } else {
-      showError(message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const refresh = async () => {
@@ -390,18 +384,32 @@ const Detail = (props) => {
             </>
           </Form>
           <Spin spinning={loading}>
-            <div style={{ height: 500 }}>
-              <div
-                id='model_pie'
-                style={{ width: '100%', minWidth: 100 }}
-              ></div>
+            {quotaData.length == 0 ? 
+            <div style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "300px"
+            }}>
+              <p>暂无数据</p>
             </div>
-            <div style={{ height: 500 }}>
-              <div
-                id='model_data'
-                style={{ width: '100%', minWidth: 100 }}
-              ></div>
-            </div>
+            : 
+            <>
+              <div style={{ height: 500 }}>
+                <div
+                  id='model_pie'
+                  style={{ width: '100%', minWidth: 100 }}
+                ></div>
+              </div>
+              <div style={{ height: 500 }}>
+                <div
+                  id='model_data'
+                  style={{ width: '100%', minWidth: 100 }}
+                ></div>
+              </div>
+            </>
+            }
           </Spin>
         </Layout.Content>
       </Layout>

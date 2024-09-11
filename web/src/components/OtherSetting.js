@@ -207,31 +207,6 @@ const OtherSetting = () => {
             </Button>
           </Form.Section>
         </Form>
-        {/* 个性化设置 */}
-        <Form
-          values={inputs}
-          getFormApi={(formAPI) => (formAPIPersonalization.current = formAPI)}
-          style={{ marginBottom: 15 }}
-        >
-          <Form.Section text={'个性化设置'}>
-            <Form.TextArea
-              label={'首页内容'}
-              placeholder={
-                '在此输入首页内容，支持 Markdown & HTML 代码，设置后首页的状态信息将不再显示。如果输入的是一个链接，则会使用该链接作为 iframe 的 src 属性，这允许你设置任意网页作为首页。'
-              }
-              field={'HomePageContent'}
-              onChange={handleInputChange}
-              style={{ fontFamily: 'JetBrains Mono, Consolas' }}
-              autosize={{ minRows: 6, maxRows: 12 }}
-            />
-            <Button
-              onClick={() => submitOption('HomePageContent')}
-              loading={loadingInput['HomePageContent']}
-            >
-              设置首页内容
-            </Button>
-          </Form.Section>
-        </Form>
       </Col>
       {/*<Modal*/}
       {/*  onClose={() => setShowUpdateModal(false)}*/}

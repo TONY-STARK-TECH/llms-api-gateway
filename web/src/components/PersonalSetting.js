@@ -50,7 +50,6 @@ const PersonalSetting = () => {
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [showWeChatBindModal, setShowWeChatBindModal] = useState(false);
   const [showEmailBindModal, setShowEmailBindModal] = useState(false);
-  const [showAccountDeleteModal, setShowAccountDeleteModal] = useState(false);
   const [turnstileEnabled, setTurnstileEnabled] = useState(false);
   const [turnstileSiteKey, setTurnstileSiteKey] = useState('');
   const [turnstileToken, setTurnstileToken] = useState('');
@@ -104,18 +103,6 @@ const PersonalSetting = () => {
     setInputs((inputs) => ({ ...inputs, [name]: value }));
   };
 
-  const generateAccessToken = async () => {
-    const res = await API.get('/api/user/token');
-    const { success, message, data } = res.data;
-    if (success) {
-      setSystemToken(data);
-      await copy(data);
-      showSuccess(`令牌已重置并已复制到剪贴板`);
-    } else {
-      showError(message);
-    }
-  };
-
   const getAffLink = async () => {
     const res = await API.get('/api/user/aff');
     const { success, message, data } = res.data;
@@ -143,38 +130,6 @@ const PersonalSetting = () => {
     if (success) {
       setModels(data);
       console.log(data);
-    } else {
-      showError(message);
-    }
-  };
-
-  const handleAffLinkClick = async (e) => {
-    e.target.select();
-    await copy(e.target.value);
-    showSuccess(`邀请链接已复制到剪切板`);
-  };
-
-  const handleSystemTokenClick = async (e) => {
-    e.target.select();
-    await copy(e.target.value);
-    showSuccess(`系统令牌已复制到剪切板`);
-  };
-
-  const deleteAccount = async () => {
-    if (inputs.self_account_deletion_confirmation !== userState.user.username) {
-      showError('请输入你的账户名以确认删除！');
-      return;
-    }
-
-    const res = await API.delete('/api/user/self');
-    const { success, message } = res.data;
-
-    if (success) {
-      showSuccess('账户已删除！');
-      await API.get('/api/user/logout');
-      userDispatch({ type: 'logout' });
-      localStorage.removeItem('user');
-      navigate('/login');
     } else {
       showError(message);
     }
@@ -344,7 +299,7 @@ const PersonalSetting = () => {
               <div style={{ marginTop: 20 }}>
                 <Typography.Text strong>邮箱</Typography.Text>
                 <div
-                  style={{ display: 'flex', justifyContent: 'space-between' }}
+                  style={{ display: 'flex' }}
                 >
                   <div>
                     <Input
@@ -358,6 +313,7 @@ const PersonalSetting = () => {
                   </div>
                   <div>
                     <Button
+                      style={{marginLeft: 8}}
                       onClick={() => {
                         setShowEmailBindModal(true);
                       }}
@@ -371,9 +327,6 @@ const PersonalSetting = () => {
               </div>
               <div style={{ marginTop: 10 }}>
                 <Space>
-                  <Button onClick={generateAccessToken}>
-                    生成系统访问令牌
-                  </Button>
                   <Button
                     onClick={() => {
                       setShowChangePasswordModal(true);
@@ -381,36 +334,19 @@ const PersonalSetting = () => {
                   >
                     修改密码
                   </Button>
+                </Space>
+                <Space>
                   <Button
-                    type={'danger'}
-                    onClick={() => {
-                      setShowAccountDeleteModal(true);
-                    }}
-                  >
-                    删除个人账户
+                      style={{marginLeft: 8}}
+                      onClick={() => {
+                        setShowWeChatBindModal(true);
+                      }}
+                    >
+                      绑定微信账号
                   </Button>
                 </Space>
-
-                {systemToken && (
-                  <Input
-                    readOnly
-                    value={systemToken}
-                    onClick={handleSystemTokenClick}
-                    style={{ marginTop: '10px' }}
-                  />
-                )}
-                {status.wechat_login && (
-                  <Button
-                    onClick={() => {
-                      setShowWeChatBindModal(true);
-                    }}
-                  >
-                    绑定微信账号
-                  </Button>
-                )}
                 <Modal
                   onCancel={() => setShowWeChatBindModal(false)}
-                  // onOpen={() => setShowWeChatBindModal(true)}
                   visible={showWeChatBindModal}
                   size={'small'}
                 >
@@ -486,44 +422,6 @@ const PersonalSetting = () => {
               ) : (
                 <></>
               )}
-            </Modal>
-            <Modal
-              onCancel={() => setShowAccountDeleteModal(false)}
-              visible={showAccountDeleteModal}
-              size={'small'}
-              centered={true}
-              onOk={deleteAccount}
-            >
-              <div style={{ marginTop: 20 }}>
-                <Banner
-                  type='danger'
-                  description='您正在删除自己的帐户，将清空所有数据且不可恢复'
-                  closeIcon={null}
-                />
-              </div>
-              <div style={{ marginTop: 20 }}>
-                <Input
-                  placeholder={`输入你的账户名 ${userState?.user?.username} 以确认删除`}
-                  name='self_account_deletion_confirmation'
-                  value={inputs.self_account_deletion_confirmation}
-                  onChange={(value) =>
-                    handleInputChange(
-                      'self_account_deletion_confirmation',
-                      value,
-                    )
-                  }
-                />
-                {turnstileEnabled ? (
-                  <Turnstile
-                    sitekey={turnstileSiteKey}
-                    onVerify={(token) => {
-                      setTurnstileToken(token);
-                    }}
-                  />
-                ) : (
-                  <></>
-                )}
-              </div>
             </Modal>
             <Modal
               onCancel={() => setShowChangePasswordModal(false)}
