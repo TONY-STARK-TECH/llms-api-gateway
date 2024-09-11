@@ -14,22 +14,19 @@ import {
   Toast,
 } from '@douyinfe/semi-ui';
 import Title from '@douyinfe/semi-ui/lib/es/typography/title';
+import { createRoot } from 'react-dom/client';
+import {QRCodeSVG} from 'qrcode.react';
 
 const TopUp = () => {
-  const [redemptionCode, setRedemptionCode] = useState('');
-  const [topUpCode, setTopUpCode] = useState('');
   const [topUpCount, setTopUpCount] = useState(0);
-  const [minTopupCount, setMinTopUpCount] = useState(1);
   const [amount, setAmount] = useState(0.0);
   const [minTopUp, setMinTopUp] = useState(1);
   const [topUpLink, setTopUpLink] = useState('');
   const [enableOnlineTopUp, setEnableOnlineTopUp] = useState(false);
   const [userQuota, setUserQuota] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
-  const [payWay, setPayWay] = useState('');
 
-  const preTopUp = async (payment) => {
+  const preTopUp = async () => {
     if (!enableOnlineTopUp) {
       showError('管理员未开启在线充值！');
       return;
@@ -39,7 +36,7 @@ const TopUp = () => {
       showError('充值数量不能小于' + minTopUp);
       return;
     }
-    setPayWay(payment);
+    await onlineTopUp();
     setOpen(true);
   };
 
@@ -54,40 +51,14 @@ const TopUp = () => {
     setOpen(false);
     try {
       const res = await API.post('/api/user/pay', {
-        amount: parseInt(topUpCount),
-        top_up_code: topUpCode,
-        payment_method: payWay,
+        amount: parseInt(topUpCount)
       });
       if (res !== undefined) {
         const { message, data } = res.data;
-        // showInfo(message);
         if (message === 'success') {
-          let params = data;
-          let url = res.data.url;
-          let form = document.createElement('form');
-          form.action = url;
-          form.method = 'POST';
-          // 判断是否为safari浏览器
-          let isSafari =
-            navigator.userAgent.indexOf('Safari') > -1 &&
-            navigator.userAgent.indexOf('Chrome') < 1;
-          if (!isSafari) {
-            form.target = '_blank';
-          }
-          for (let key in params) {
-            let input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = key;
-            input.value = params[key];
-            form.appendChild(input);
-          }
-          document.body.appendChild(form);
-          form.submit();
-          document.body.removeChild(form);
+          setTopUpLink(data);
         } else {
-          showError(data);
-          // setTopUpCount(parseInt(res.data.count));
-          // setAmount(parseInt(data));
+          showError(res);
         }
       } else {
         showError(res);
@@ -112,9 +83,6 @@ const TopUp = () => {
     let status = localStorage.getItem('status');
     if (status) {
       status = JSON.parse(status);
-      if (status.top_up_link) {
-        setTopUpLink(status.top_up_link);
-      }
       if (status.min_topup) {
         setMinTopUp(status.min_topup);
       }
@@ -126,8 +94,7 @@ const TopUp = () => {
   }, []);
 
   const renderAmount = () => {
-    // console.log(amount);
-    return amount + '元';
+    return amount;
   };
 
   const getAmount = async (value) => {
@@ -137,7 +104,6 @@ const TopUp = () => {
     try {
       const res = await API.post('/api/user/amount', {
         amount: parseFloat(value),
-        top_up_code: topUpCode,
       });
       if (res !== undefined) {
         const { message, data } = res.data;
@@ -166,17 +132,26 @@ const TopUp = () => {
       <Layout>
         <Layout.Content>
           <Modal
-            title='确定要充值吗'
+            title='在线充值'
             visible={open}
-            onOk={onlineTopUp}
             onCancel={handleCancel}
+            hasCancel={false}
+            footer={<></>}
             maskClosable={false}
             size={'small'}
             centered={true}
           >
-            <p>充值数量：{topUpCount}</p>
-            <p>实付金额：{renderAmount()}</p>
-            <p>是否确认充值？</p>
+            <div style={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
+              <p>充值：$ {topUpCount}，<span style={{color: "#FF6A00"}}>实付：￥{renderAmount()}</span></p>
+              <p>请打开微信扫码支付，支付成功后请主动刷新余额</p>
+              <QRCodeSVG 
+                  style={{width: 320, height: 320}}
+                  value={topUpLink} 
+                  imageSettings={{
+                  width: 320,
+                  height: 320
+                }}/>
+            </div>
           </Modal>
           <div
             style={{ marginTop: 20, display: 'flex', justifyContent: 'center' }}
@@ -190,7 +165,7 @@ const TopUp = () => {
                   <Form.InputNumber
                     disabled={!enableOnlineTopUp}
                     field={'redemptionCount'}
-                    label={'实付：' + renderAmount()}
+                    label={'实付：' + renderAmount() + ' 元；'}
                     labelPosition={"inset"}
                     style={{
                       color: "#FF6A00",
@@ -219,7 +194,7 @@ const TopUp = () => {
                       type={'primary'}
                       theme={'solid'}
                       onClick={async () => {
-                        preTopUp('wx');
+                        preTopUp();
                       }}
                     >
                       微信支付

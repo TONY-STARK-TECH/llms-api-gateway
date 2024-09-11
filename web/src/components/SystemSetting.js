@@ -28,13 +28,9 @@ const SystemSetting = () => {
     ServerAddress: '',
     WorkerUrl: '',
     WorkerValidKey: '',
-    EpayId: '',
-    EpayKey: '',
     Price: 7.3,
     MinTopUp: 1,
     TopupGroupRatio: '',
-    PayAddress: '',
-    CustomCallbackAddress: '',
     Footer: '',
     WeChatAuthEnabled: '',
     WeChatServerAddress: '',
@@ -142,16 +138,19 @@ const SystemSetting = () => {
       setShowPasswordWarningModal(true);
       return;
     }
+
     if (
       name === 'Notice' ||
       (name.startsWith('SMTP') && name !== 'SMTPSSLEnabled') ||
       name === 'ServerAddress' ||
       name === 'WorkerUrl' ||
       name === 'WorkerValidKey' ||
-      name === 'EpayId' ||
-      name === 'EpayKey' ||
+      name === 'WeChatMerchantId' ||
+      name === 'WeChatAppId' ||
+      name === 'WeChatApiV2Password' ||
+      name === 'WeChatMerchantCert' ||
+      name === 'WeChatMerchantKey' ||
       name === 'Price' ||
-      name === 'PayAddress' ||
       name === 'GitHubClientId' ||
       name === 'GitHubClientSecret' ||
       name === 'WeChatServerAddress' ||
@@ -175,11 +174,33 @@ const SystemSetting = () => {
     await updateOption('ServerAddress', ServerAddress);
   };
 
-  const submitPayAddress = async () => {
+  const submitPayConfig = async () => {
     if (inputs.ServerAddress === '') {
       showError('请先填写服务器地址');
       return;
     }
+    
+    if (inputs.WeChatMerchantId === '') {
+      showError('请先填写微信商户 ID');
+      return;
+    }
+    if (inputs.WeChatAppId === '') {
+      showError('请先填写微信应用 ID');
+      return;
+    }
+    if (inputs.WeChatApiV2Password === '') {
+      showError('请先填写微信V2版本密钥');
+      return;
+    }
+    if (inputs.WeChatMerchantCert === '') {
+      showError('请先填写商户证书内容');
+      return;
+    }
+    if (inputs.WeChatMerchantKey === '') {
+      showError('请先填写商户证书密钥内容');
+      return;
+    }
+
     if (originInputs['TopupGroupRatio'] !== inputs.TopupGroupRatio) {
       if (!verifyJSON(inputs.TopupGroupRatio)) {
         showError('充值分组倍率不是合法的 JSON 字符串');
@@ -187,14 +208,14 @@ const SystemSetting = () => {
       }
       await updateOption('TopupGroupRatio', inputs.TopupGroupRatio);
     }
-    let PayAddress = removeTrailingSlash(inputs.PayAddress);
-    await updateOption('PayAddress', PayAddress);
-    if (inputs.EpayId !== '') {
-      await updateOption('EpayId', inputs.EpayId);
-    }
-    if (inputs.EpayKey !== undefined && inputs.EpayKey !== '') {
-      await updateOption('EpayKey', inputs.EpayKey);
-    }
+    // wechat pay
+    inputs.WeChatMerchantId !== '' && await updateOption('WeChatMerchantId', inputs.WeChatMerchantId);
+    inputs.WeChatAppId !== '' && await updateOption('WeChatAppId', inputs.WeChatAppId);
+    inputs.WeChatApiV2Password !== '' && await updateOption('WeChatApiV2Password', inputs.WeChatApiV2Password);
+    inputs.WeChatMerchantCert !== '' && await updateOption('WeChatMerchantCert', inputs.WeChatMerchantCert);
+    inputs.WeChatMerchantKey !== '' && await updateOption('WeChatMerchantKey', inputs.WeChatMerchantKey);
+
+    // prize update
     await updateOption('Price', '' + inputs.Price);
   };
 
@@ -246,70 +267,58 @@ const SystemSetting = () => {
     }
   };
 
-  const submitGitHubOAuth = async () => {
-    if (originInputs['GitHubClientId'] !== inputs.GitHubClientId) {
-      await updateOption('GitHubClientId', inputs.GitHubClientId);
-    }
-    if (
-      originInputs['GitHubClientSecret'] !== inputs.GitHubClientSecret &&
-      inputs.GitHubClientSecret !== ''
-    ) {
-      await updateOption('GitHubClientSecret', inputs.GitHubClientSecret);
-    }
-  };
-
   return (
     <Grid columns={1}>
       <Grid.Column>
-        <Form loading={loading} inverted={isDark}>
-          <Header as='h3' inverted={isDark}>
-            通用设置
-          </Header>
+        <Form loading={loading} inverted={isDark} layout="horizontal" style={{marginTop: 10}}>
           <Form.Group widths='equal'>
             <Form.Input
-              label='服务器地址'
-              placeholder='例如：https://yourdomain.com'
-              value={inputs.ServerAddress}
-              name='ServerAddress'
-              onChange={handleInputChange}
+                placeholder='必须与服务器可访问域名一致，支付回调也是这里'
+                value={inputs.ServerAddress}
+                name='ServerAddress'
+                onChange={handleInputChange}
             />
+            <Form.Button onClick={submitServerAddress}>
+              更新服务器地址
+            </Form.Button>
           </Form.Group>
-          <Form.Button onClick={submitServerAddress}>
-            更新服务器地址
-          </Form.Button>
           <Divider />
-          <Header as='h3' inverted={isDark}>
-            支付设置（当前仅支持易支付接口，默认使用上方服务器地址作为回调地址！）
-          </Header>
           <Form.Group widths='equal'>
             <Form.Input
-              label='支付地址，不填写则不启用在线支付'
-              placeholder='例如：https://yourdomain.com'
-              value={inputs.PayAddress}
-              name='PayAddress'
+              label='微信商户ID'
+              placeholder='例如：16******65'
+              value={inputs.WeChatMerchantId}
+              name='WeChatMerchantId'
               onChange={handleInputChange}
             />
             <Form.Input
-              label='易支付商户ID'
-              placeholder='例如：0001'
-              value={inputs.EpayId}
-              name='EpayId'
+              label='微信AppID'
+              placeholder='例如：wx*******'
+              value={inputs.WeChatAppId}
+              name='WeChatAppId'
               onChange={handleInputChange}
             />
             <Form.Input
-              label='易支付商户密钥'
+              label='微信 API V2 商户密钥'
               placeholder='敏感信息不会发送到前端显示'
-              value={inputs.EpayKey}
-              name='EpayKey'
+              value={inputs.WeChatApiV2Password}
+              name='WeChatApiV2Password'
               onChange={handleInputChange}
             />
           </Form.Group>
           <Form.Group widths='equal'>
             <Form.Input
-              label='回调地址，不填写则使用上方服务器地址作为回调地址'
-              placeholder='例如：https://yourdomain.com'
-              value={inputs.CustomCallbackAddress}
-              name='CustomCallbackAddress'
+              label='微信商户证书 Cert.pem'
+              placeholder='敏感信息不会发送到前端显示'
+              value={inputs.WeChatMerchantCert}
+              name='WeChatMerchantCert'
+              onChange={handleInputChange}
+            />
+            <Form.Input
+              label='微信商户证书密钥 Key.pem'
+              placeholder='敏感信息不会发送到前端显示'
+              value={inputs.WeChatMerchantKey}
+              name='WeChatMerchantKey'
               onChange={handleInputChange}
             />
             <Form.Input
@@ -320,27 +329,27 @@ const SystemSetting = () => {
               min={0}
               onChange={handleInputChange}
             />
-            <Form.Input
-              label='最低充值美元数量（以美金为单位，如果使用额度请自行换算！）'
-              placeholder='例如：2，就是最低充值2$'
+          </Form.Group>
+          <Form.Input
+              label='最低充值金额'
+              placeholder='例如：2，就是最低充值 $2'
               value={inputs.MinTopUp}
               name='MinTopUp'
-              min={1}
+              min={5}
               onChange={handleInputChange}
             />
-          </Form.Group>
           <Form.Group widths='equal'>
             <Form.TextArea
               label='充值分组倍率'
               name='TopupGroupRatio'
               onChange={handleInputChange}
-              style={{ minHeight: 250, fontFamily: 'JetBrains Mono, Consolas' }}
+              style={{ minHeight: 120, fontFamily: 'JetBrains Mono, Consolas' }}
               autoComplete='new-password'
               value={inputs.TopupGroupRatio}
               placeholder='为一个 JSON 文本，键为组名称，值为倍率'
             />
           </Form.Group>
-          <Form.Button onClick={submitPayAddress}>更新支付设置</Form.Button>
+          <Form.Button onClick={submitPayConfig}>更新支付设置</Form.Button>
           <Divider />
           <Header as='h3' inverted={isDark}>
             配置登录注册

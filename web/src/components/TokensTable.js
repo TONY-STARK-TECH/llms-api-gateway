@@ -177,43 +177,9 @@ const TokensTable = () => {
                 {
                   node: 'item',
                   key: 'next',
-                  disabled: !localStorage.getItem('chat_link'),
-                  name: 'ChatGPT Next Web',
+                  name: '光子人工智能',
                   onClick: () => {
-                    onOpenLink('next', record.key);
-                  },
-                },
-                {
-                  node: 'item',
-                  key: 'next-mj',
-                  disabled: !localStorage.getItem('chat_link2'),
-                  name: 'ChatGPT Web & Midjourney',
-                  onClick: () => {
-                    onOpenLink('next-mj', record.key);
-                  },
-                },
-                // {
-                //   node: 'item',
-                //   key: 'lobe',
-                //   name: 'Lobe Chat',
-                //   onClick: () => {
-                //     onOpenLink('lobe', record.key);
-                //   },
-                // },
-                {
-                  node: 'item',
-                  key: 'ama',
-                  name: 'AMA 问天（BotGem）',
-                  onClick: () => {
-                    onOpenLink('ama', record.key);
-                  },
-                },
-                {
-                  node: 'item',
-                  key: 'opencat',
-                  name: 'OpenCat',
-                  onClick: () => {
-                    onOpenLink('opencat', record.key);
+                    window.open("https://fastx-ai.com", "_blank")
                   },
                 },
               ]}

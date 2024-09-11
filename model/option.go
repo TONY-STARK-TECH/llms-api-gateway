@@ -62,10 +62,6 @@ func InitOptionMap() {
 	common.OptionMap["ServerAddress"] = ""
 	common.OptionMap["WorkerUrl"] = constant.WorkerUrl
 	common.OptionMap["WorkerValidKey"] = constant.WorkerValidKey
-	common.OptionMap["PayAddress"] = ""
-	common.OptionMap["CustomCallbackAddress"] = ""
-	common.OptionMap["EpayId"] = ""
-	common.OptionMap["EpayKey"] = ""
 	common.OptionMap["Price"] = strconv.FormatFloat(constant.Price, 'f', -1, 64)
 	common.OptionMap["MinTopUp"] = strconv.Itoa(constant.MinTopUp)
 	common.OptionMap["TopupGroupRatio"] = common.TopupGroupRatio2JSONString()
@@ -245,14 +241,16 @@ func updateOptionMap(key string, value string) (err error) {
 		constant.WorkerUrl = value
 	case "WorkerValidKey":
 		constant.WorkerValidKey = value
-	case "PayAddress":
-		constant.PayAddress = value
-	case "CustomCallbackAddress":
-		constant.CustomCallbackAddress = value
-	case "EpayId":
-		constant.EpayId = value
-	case "EpayKey":
-		constant.EpayKey = value
+	case "WeChatMerchantId":
+		constant.WeChatMerchantId = value
+	case "WeChatAppId":
+		constant.WeChatAppId = value
+	case "WeChatApiV2Password":
+		constant.WeChatApiV2Password = value
+	case "WeChatMerchantCert":
+		constant.WeChatMerchantCert = value
+	case "WeChatMerchantKey":
+		constant.WeChatMerchantKey = value
 	case "Price":
 		constant.Price, _ = strconv.ParseFloat(value, 64)
 	case "MinTopUp":

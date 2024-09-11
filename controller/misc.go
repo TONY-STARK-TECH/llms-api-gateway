@@ -61,7 +61,7 @@ func GetStatus(c *gin.Context) {
 			"enable_data_export":       common.DataExportEnabled,
 			"data_export_default_time": common.DataExportDefaultTime,
 			"default_collapse_sidebar": common.DefaultCollapseSidebar,
-			"enable_online_topup":      constant.PayAddress != "" && constant.EpayId != "" && constant.EpayKey != "",
+			"enable_online_topup":      constant.WeChatMerchantId != "",
 			"mj_notify_enabled":        constant.MjNotifyEnabled,
 		},
 	})

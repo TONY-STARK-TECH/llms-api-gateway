@@ -3,43 +3,35 @@ package controller
 import (
 	"fmt"
 	"log"
-	"net/url"
+	"net/http"
 	"one-api/common"
 	"one-api/constant"
 	"one-api/model"
-	"one-api/service"
 	"strconv"
 	"sync"
 	"time"
 
-	"github.com/Calcium-Ion/go-epay/epay"
 	"github.com/gin-gonic/gin"
-	"github.com/samber/lo"
+	"github.com/go-pay/gopay"
+	"github.com/go-pay/gopay/wechat"
 )
 
-type EpayRequest struct {
+type PayRequest struct {
 	Amount        int    `json:"amount"`
-	PaymentMethod string `json:"payment_method"`
-	TopUpCode     string `json:"top_up_code"`
 }
 
 type AmountRequest struct {
 	Amount    int    `json:"amount"`
-	TopUpCode string `json:"top_up_code"`
 }
 
-func GetEpayClient() *epay.Client {
-	if constant.PayAddress == "" || constant.EpayId == "" || constant.EpayKey == "" {
+func GetPayClient() *wechat.Client {
+	if constant.WeChatAppId == "" {
 		return nil
 	}
-	withUrl, err := epay.NewClient(&epay.Config{
-		PartnerID: constant.EpayId,
-		Key:       constant.EpayKey,
-	}, constant.PayAddress)
-	if err != nil {
-		return nil
-	}
-	return withUrl
+
+	client := wechat.NewClient(constant.WeChatAppId, constant.WeChatMerchantId, constant.WeChatApiV2Password, true)
+	client.AddCertPemFileContent([]byte(constant.WeChatMerchantCert), []byte(constant.WeChatMerchantKey))
+	return client
 }
 
 func getPayMoney(amount float64, group string) float64 {
@@ -63,8 +55,8 @@ func getMinTopup() int {
 	return minTopup
 }
 
-func RequestEpay(c *gin.Context) {
-	var req EpayRequest
+func RequestPay(c *gin.Context) {
+	var req PayRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		c.JSON(200, gin.H{"message": "error", "data": "参数错误"})
@@ -87,37 +79,42 @@ func RequestEpay(c *gin.Context) {
 		return
 	}
 
-	var payType epay.PurchaseType
-	if req.PaymentMethod == "zfb" {
-		payType = epay.Alipay
-	}
-	if req.PaymentMethod == "wx" {
-		req.PaymentMethod = "wxpay"
-		payType = epay.WechatPay
-	}
-	callBackAddress := service.GetCallbackAddress()
-	returnUrl, _ := url.Parse(constant.ServerAddress + "/log")
-	notifyUrl, _ := url.Parse(callBackAddress + "/api/user/epay/notify")
+	callBackAddress := constant.ServerAddress + "/api/pay/notify"
 	tradeNo := fmt.Sprintf("%s%d", common.GetRandomString(6), time.Now().Unix())
 	tradeNo = fmt.Sprintf("USR%dNO%s", id, tradeNo)
-	client := GetEpayClient()
+	nonce := common.GetRandomString(32);
+	client := GetPayClient()
+
 	if client == nil {
 		c.JSON(200, gin.H{"message": "error", "data": "当前管理员未配置支付信息"})
 		return
 	}
-	uri, params, err := client.Purchase(&epay.PurchaseArgs{
-		Type:           payType,
-		ServiceTradeNo: tradeNo,
-		Name:           fmt.Sprintf("TUC%d", req.Amount),
-		Money:          strconv.FormatFloat(payMoney, 'f', 2, 64),
-		Device:         epay.PC,
-		NotifyUrl:      notifyUrl,
-		ReturnUrl:      returnUrl,
-	})
+
+	// 初始化 BodyMap
+	bm := make(gopay.BodyMap)
+	bm.Set("nonce_str", nonce).
+    Set("body", "余额充值").
+    Set("out_trade_no", tradeNo).
+    Set("total_fee", payMoney * 100).
+    Set("notify_url", callBackAddress).
+    Set("trade_type", wechat.TradeType_Native).
+    Set("sign_type", wechat.SignType_MD5).
+	Set("spbill_create_ip", "127.0.0.1")
+
+	wxRsp, err := client.UnifiedOrder(c, bm)
+
 	if err != nil {
-		c.JSON(200, gin.H{"message": "error", "data": "拉起支付失败"})
+		c.JSON(200, gin.H{"message": err.Error(), "data": "拉起支付失败"})
 		return
 	}
+
+	ok, err := wechat.VerifySign(constant.WeChatApiV2Password, wechat.SignType_MD5, wxRsp)
+
+	if err != nil || !ok {
+		c.JSON(200, gin.H{"message": err.Error(), "data": "订单校验失败"})
+		return
+	}
+
 	amount := req.Amount
 	if !common.DisplayInCurrencyEnabled {
 		amount = amount / int(common.QuotaPerUnit)
@@ -135,7 +132,7 @@ func RequestEpay(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "error", "data": "创建订单失败"})
 		return
 	}
-	c.JSON(200, gin.H{"message": "success", "data": params, "url": uri})
+	c.JSON(200, gin.H{"message": "success", "data": wxRsp.CodeUrl })
 }
 
 // tradeNo lock
@@ -165,64 +162,78 @@ func UnlockOrder(tradeNo string) {
 	}
 }
 
-func EpayNotify(c *gin.Context) {
-	params := lo.Reduce(lo.Keys(c.Request.URL.Query()), func(r map[string]string, t string, i int) map[string]string {
-		r[t] = c.Request.URL.Query().Get(t)
-		return r
-	}, map[string]string{})
-	client := GetEpayClient()
+func PayNotify(c *gin.Context) {
+	// 异步通知，返回给微信平台的信息
+	rsp := new(wechat.NotifyResponse) 
+	client := GetPayClient()
+
 	if client == nil {
-		log.Println("易支付回调失败 未找到配置信息")
-		_, err := c.Writer.Write([]byte("fail"))
-		if err != nil {
-			log.Println("易支付回调写入失败")
-			return
-		}
+		log.Println("回调失败 未找到配置信息")
+		rsp.ReturnCode = gopay.FAIL
+		rsp.ReturnMsg = gopay.FAIL
+		// 此写法是 gin 框架返回微信的写法
+		c.String(http.StatusBadRequest, "%s", rsp.ToXmlString())
+		return 
 	}
-	verifyInfo, err := client.Verify(params)
-	if err == nil && verifyInfo.VerifyStatus {
-		_, err := c.Writer.Write([]byte("success"))
-		if err != nil {
-			log.Println("易支付回调写入失败")
-		}
-	} else {
-		_, err := c.Writer.Write([]byte("fail"))
-		if err != nil {
-			log.Println("易支付回调写入失败")
-		}
-		log.Println("易支付回调签名验证失败")
+
+	notifyReq, err := wechat.ParseNotifyToBodyMap(c.Request)
+	ok, err := wechat.VerifySign(constant.WeChatApiV2Password, wechat.SignType_MD5, notifyReq)
+
+	if err != nil {
+		log.Println("回调签名验证失败")
+		rsp.ReturnCode = gopay.FAIL
+		rsp.ReturnMsg = "回调签名验证失败"
+		// 此写法是 gin 框架返回微信的写法
+		c.String(http.StatusBadRequest, "%s", rsp.ToXmlString())
 		return
 	}
 
-	if verifyInfo.TradeStatus == epay.StatusTradeSuccess {
-		log.Println(verifyInfo)
-		LockOrder(verifyInfo.ServiceTradeNo)
-		defer UnlockOrder(verifyInfo.ServiceTradeNo)
-		topUp := model.GetTopUpByTradeNo(verifyInfo.ServiceTradeNo)
+	if ok {
+		OutTradeNo := notifyReq.Get("OutTradeNo")
+		defer UnlockOrder(OutTradeNo)
+		topUp := model.GetTopUpByTradeNo(OutTradeNo)
+
 		if topUp == nil {
-			log.Printf("易支付回调未找到订单: %v", verifyInfo)
+			rsp.ReturnCode = gopay.FAIL
+			rsp.ReturnMsg = "支付回调未找到订单"
+			log.Printf("支付回调未找到订单: %v", OutTradeNo)
+			c.String(http.StatusOK, "%s", rsp.ToXmlString())
 			return
 		}
+
 		if topUp.Status == "pending" {
 			topUp.Status = "success"
 			err := topUp.Update()
+
 			if err != nil {
-				log.Printf("易支付回调更新订单失败: %v", topUp)
+				rsp.ReturnCode = gopay.FAIL
+				rsp.ReturnMsg = "支付回调更新订单失败"
+				log.Printf("支付回调更新订单失败: %v", topUp)
+				c.String(http.StatusOK, "%s", rsp.ToXmlString())
 				return
 			}
-			//user, _ := model.GetUserById(topUp.UserId, false)
-			//user.Quota += topUp.Amount * 500000
+			
 			err = model.IncreaseUserQuota(topUp.UserId, topUp.Amount*int(common.QuotaPerUnit))
 			if err != nil {
-				log.Printf("易支付回调更新用户失败: %v", topUp)
+				rsp.ReturnCode = gopay.FAIL
+				rsp.ReturnMsg = "支付回调更新用户失败"
+				log.Printf("支付回调更新用户失败: %v", topUp)
+				c.String(http.StatusOK, "%s", rsp.ToXmlString())
 				return
 			}
-			log.Printf("易支付回调更新用户成功 %v", topUp)
+
+			log.Printf("支付回调更新用户成功 %v", topUp)
 			model.RecordLog(topUp.UserId, model.LogTypeTopup, fmt.Sprintf("使用在线充值成功，充值金额: %v，支付金额：%f", common.LogQuota(topUp.Amount*int(common.QuotaPerUnit)), topUp.Money))
 		}
+		rsp.ReturnCode = gopay.SUCCESS
+		rsp.ReturnMsg = gopay.OK
 	} else {
-		log.Printf("易支付异常回调: %v", verifyInfo)
+		rsp.ReturnCode = gopay.FAIL
+		rsp.ReturnMsg = "异常回调"
+		log.Printf("异常回调: %v", ok)
 	}
+
+	c.String(http.StatusOK, "%s", rsp.ToXmlString())
 }
 
 func RequestAmount(c *gin.Context) {

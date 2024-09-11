@@ -38,6 +38,9 @@ importers:
       marked:
         specifier: ^4.1.1
         version: 4.3.0
+      qrcode.react:
+        specifier: ^4.0.1
+        version: 4.0.1(react@18.2.0)
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -1166,6 +1169,11 @@ packages:
 
   protocol-buffers-schema@3.6.0:
     resolution: {integrity: sha512-TdDRD+/QNdrCGCE7v8340QyuXd4kIWIgapsE2+n/SaGiSSbomYl4TjHlvIoCWRpE7wFt02EpB35VVA2ImcBVqw==}
+
+  qrcode.react@4.0.1:
+    resolution: {integrity: sha512-Lpj0tPBn561WiQ3QQWXbkx8xTtB8BZkJeMZWLJIL8iaPBCoWzW1IpCeU3gY5MDqsb0+efCvEGkl9O0naP64crA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
 
   react-dom@18.2.0:
     resolution: {integrity: sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==}
@@ -2569,6 +2577,10 @@ snapshots:
       react-is: 16.13.1
 
   protocol-buffers-schema@3.6.0: {}
+
+  qrcode.react@4.0.1(react@18.2.0):
+    dependencies:
+      react: 18.2.0
 
   react-dom@18.2.0(react@18.2.0):
     dependencies:

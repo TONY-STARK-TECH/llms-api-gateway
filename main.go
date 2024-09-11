@@ -19,6 +19,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/go-pay/gopay"
 
 	_ "net/http/pprof"
 )
@@ -31,7 +32,10 @@ var indexPage []byte
 
 func main() {
 	common.SetupLogger()
-	common.SysLog("New API " + common.Version + " started")
+	
+	common.SysLog("llms Version: " + common.Version)
+	common.SysLog("GoPay Version: " + gopay.Version)
+
 	if os.Getenv("GIN_MODE") != "debug" {
 		gin.SetMode(gin.ReleaseMode)
 	}
