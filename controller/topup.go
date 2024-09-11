@@ -99,7 +99,7 @@ func RequestPay(c *gin.Context) {
     Set("notify_url", callBackAddress).
     Set("trade_type", wechat.TradeType_Native).
     Set("sign_type", wechat.SignType_MD5).
-	Set("spbill_create_ip", "127.0.0.1")
+	Set("spbill_create_ip", "47.120.40.92")
 
 	wxRsp, err := client.UnifiedOrder(c, bm)
 
