@@ -3,11 +3,12 @@ package model
 import (
 	"errors"
 	"fmt"
-	"gorm.io/gorm"
 	"one-api/common"
 	"one-api/constant"
 	"strconv"
 	"strings"
+
+	"gorm.io/gorm"
 )
 
 type Token struct {
@@ -29,8 +30,7 @@ type Token struct {
 
 func GetAllUserTokens(userId int, startIdx int, num int) ([]*Token, error) {
 	var tokens []*Token
-	var err error
-	err = DB.Where("user_id = ?", userId).Order("id desc").Limit(num).Offset(startIdx).Find(&tokens).Error
+	err := DB.Where("user_id = ?", userId).Order("id desc").Limit(num).Offset(startIdx).Find(&tokens).Error
 	return tokens, err
 }
 
@@ -79,7 +79,7 @@ func ValidateUserToken(key string) (token *Token, err error) {
 			}
 			keyPrefix := key[:3]
 			keySuffix := key[len(key)-3:]
-			return token, errors.New(fmt.Sprintf("[sk-%s***%s] 该令牌额度已用尽 !token.UnlimitedQuota && token.RemainQuota = %d", keyPrefix, keySuffix, token.RemainQuota))
+			return token, fmt.Errorf("[sk-%s***%s] 该令牌额度已用尽 !token.UnlimitedQuota && token.RemainQuota = %d", keyPrefix, keySuffix, token.RemainQuota)
 		}
 		return token, nil
 	}
@@ -122,15 +122,13 @@ func GetTokenByKey(key string) (*Token, error) {
 }
 
 func (token *Token) Insert() error {
-	var err error
-	err = DB.Create(token).Error
+	err := DB.Create(token).Error
 	return err
 }
 
 // Update Make sure your token's fields is completed, because this will update non-zero values
 func (token *Token) Update() error {
-	var err error
-	err = DB.Model(token).Select("name", "status", "expired_time", "remain_quota", "unlimited_quota", "model_limits_enabled", "model_limits").Updates(token).Error
+	err := DB.Model(token).Select("name", "status", "expired_time", "remain_quota", "unlimited_quota", "model_limits_enabled", "model_limits").Updates(token).Error
 	return err
 }
 
@@ -140,8 +138,7 @@ func (token *Token) SelectUpdate() error {
 }
 
 func (token *Token) Delete() error {
-	var err error
-	err = DB.Delete(token).Error
+	err := DB.Delete(token).Error
 	return err
 }
 
@@ -248,7 +245,7 @@ func PreConsumeTokenQuota(tokenId int, quota int) (userQuota int, err error) {
 		return 0, err
 	}
 	if userQuota < quota {
-		return 0, errors.New(fmt.Sprintf("用户额度不足，剩余额度为 %d", userQuota))
+		return 0, fmt.Errorf("用户额度不足，剩余额度为 %d", userQuota)
 	}
 	err = DecreaseTokenQuota(tokenId, quota)
 	if err != nil {
@@ -259,7 +256,7 @@ func PreConsumeTokenQuota(tokenId int, quota int) (userQuota int, err error) {
 }
 
 func PostConsumeTokenQuota(tokenId int, userQuota int, quota int, preConsumedQuota int, sendEmail bool) (err error) {
-	token, err := GetTokenById(tokenId)
+	token, _ := GetTokenById(tokenId)
 
 	if quota > 0 {
 		err = DecreaseUserQuota(token.UserId, quota)

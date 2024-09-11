@@ -53,7 +53,7 @@ func updatePricing() {
 	}
 
 	pricingMap = make([]Pricing, 0)
-	for model, _ := range allModels {
+	for model := range allModels {
 		pricing := Pricing{
 			Available: true,
 			ModelName: model,
