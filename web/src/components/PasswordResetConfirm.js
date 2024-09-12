@@ -63,12 +63,9 @@ const PasswordResetConfirm = () => {
   return (
     <Grid textAlign='center' style={{ marginTop: '48px' }}>
       <Grid.Column style={{ maxWidth: 450 }}>
-        <Header as='h2' color='' textAlign='center'>
-          <Image src='/logo.png' /> 密码重置确认
-        </Header>
+        <Header as='h2' textAlign='center' style={{color: "#FFFFFF"}}>密码重置确认</Header>
         <Form size='large'>
-          <Segment>
-            <Form.Input
+        <Form.Input
               fluid
               icon='mail'
               iconPosition='left'
@@ -94,8 +91,9 @@ const PasswordResetConfirm = () => {
               />
             )}
             <Button
-              color='green'
-              fluid
+              theme='solid'
+              style={{ width: '100%' }}
+              type={'primary'}
               size='large'
               onClick={handleSubmit}
               loading={loading}
@@ -103,7 +101,6 @@ const PasswordResetConfirm = () => {
             >
               {disableButton ? `密码重置完成` : '提交'}
             </Button>
-          </Segment>
         </Form>
       </Grid.Column>
     </Grid>

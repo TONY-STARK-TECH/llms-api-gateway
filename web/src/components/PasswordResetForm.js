@@ -31,8 +31,12 @@ const PasswordResetForm = () => {
   }
 
   async function handleSubmit(e) {
+    if (!email || email.length == 0) {
+      showError("请输入邮箱地址");
+      return
+    }
     setDisableButton(true);
-    if (!email) return;
+    
     setLoading(true);
     const res = await API.get(
       `/api/reset_password?email=${email}`,
@@ -50,13 +54,9 @@ const PasswordResetForm = () => {
   return (
     <Grid textAlign='center' style={{ marginTop: '48px' }}>
       <Grid.Column style={{ maxWidth: 450 }}>
-        <Header as='h2' color='' textAlign='center'>
-          <Image src='/logo.png' /> 密码重置
-        </Header>
+        <Header as='h2' textAlign='center' style={{color: "#FFFFFF"}}>密码重置</Header>
         <Form size='large'>
-          <Segment>
-            <Form.Input
-              fluid
+            <Form.Input  
               icon='mail'
               iconPosition='left'
               placeholder='邮箱地址'
@@ -65,8 +65,9 @@ const PasswordResetForm = () => {
               onChange={handleChange}
             />
             <Button
-              color='green'
-              fluid
+              theme='solid'
+              style={{ width: '100%' }}
+              type={'primary'}
               size='large'
               onClick={handleSubmit}
               loading={loading}
@@ -74,7 +75,6 @@ const PasswordResetForm = () => {
             >
               {disableButton ? `重试 (${countdown})` : '提交'}
             </Button>
-          </Segment>
         </Form>
       </Grid.Column>
     </Grid>
