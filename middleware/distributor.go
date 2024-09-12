@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"one-api/common"
@@ -94,6 +95,14 @@ func Distribute() func(c *gin.Context) {
 func getModelRequest(c *gin.Context) (*ModelRequest, bool, error) {
 	var modelRequest ModelRequest
 	shouldSelectChannel := true
+	var err error
+	if !strings.HasPrefix(c.Request.URL.Path, "/v1/audio/transcriptions") {
+		err = common.UnmarshalBodyReusable(c, &modelRequest)
+	}
+	if err != nil {
+		abortWithOpenAiMessage(c, http.StatusBadRequest, "无效的请求, "+err.Error())
+		return nil, false, errors.New("无效的请求, " + err.Error())
+	}
 	if strings.HasPrefix(c.Request.URL.Path, "/v1/moderations") {
 		if modelRequest.Model == "" {
 			modelRequest.Model = "text-moderation-stable"
