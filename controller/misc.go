@@ -35,20 +35,12 @@ func GetStatus(c *gin.Context) {
 			"version":                  common.Version,
 			"start_time":               common.StartTime,
 			"email_verification":       common.EmailVerificationEnabled,
-			"github_oauth":             common.GitHubOAuthEnabled,
-			"github_client_id":         common.GitHubClientId,
-			"telegram_oauth":           common.TelegramOAuthEnabled,
-			"telegram_bot_name":        common.TelegramBotName,
 			"system_name":              common.SystemName,
 			"logo":                     common.Logo,
 			"footer_html":              common.Footer,
-			"wechat_qrcode":            common.WeChatAccountQRCodeImageURL,
-			"wechat_login":             common.WeChatAuthEnabled,
 			"server_address":           constant.ServerAddress,
 			"price":                    constant.Price,
 			"min_topup":                constant.MinTopUp,
-			"turnstile_check":          common.TurnstileCheckEnabled,
-			"turnstile_site_key":       common.TurnstileSiteKey,
 			"top_up_link":              common.TopUpLink,
 			"chat_link":                common.ChatLink,
 			"chat_link2":               common.ChatLink2,
@@ -56,12 +48,10 @@ func GetStatus(c *gin.Context) {
 			"display_in_currency":      common.DisplayInCurrencyEnabled,
 			"enable_batch_update":      common.BatchUpdateEnabled,
 			"enable_drawing":           common.DrawingEnabled,
-			"enable_task":              common.TaskEnabled,
 			"enable_data_export":       common.DataExportEnabled,
 			"data_export_default_time": common.DataExportDefaultTime,
 			"default_collapse_sidebar": common.DefaultCollapseSidebar,
 			"enable_online_topup":      constant.WeChatMerchantId != "",
-			"mj_notify_enabled":        constant.MjNotifyEnabled,
 		},
 	})
 }
@@ -83,16 +73,6 @@ func GetAbout(c *gin.Context) {
 		"success": true,
 		"message": "",
 		"data":    common.OptionMap["About"],
-	})
-}
-
-func GetMidjourney(c *gin.Context) {
-	common.OptionMapRWMutex.RLock()
-	defer common.OptionMapRWMutex.RUnlock()
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "",
-		"data":    common.OptionMap["Midjourney"],
 	})
 }
 

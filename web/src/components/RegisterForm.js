@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { API, getLogo, showError, showInfo, showSuccess } from '../helpers';
-import Turnstile from 'react-turnstile';
 import { Button, Card, Form, Layout } from '@douyinfe/semi-ui';
 import Title from '@douyinfe/semi-ui/lib/es/typography/title';
 import Text from '@douyinfe/semi-ui/lib/es/typography/text';
@@ -16,11 +15,8 @@ const RegisterForm = () => {
   });
   const { username, password, password2 } = inputs;
   const [showEmailVerification, setShowEmailVerification] = useState(false);
-  const [turnstileEnabled, setTurnstileEnabled] = useState(false);
-  const [turnstileSiteKey, setTurnstileSiteKey] = useState('');
-  const [turnstileToken, setTurnstileToken] = useState('');
   const [loading, setLoading] = useState(false);
-  const logo = getLogo();
+  
   let affCode = new URLSearchParams(window.location.search).get('aff');
   if (affCode) {
     localStorage.setItem('aff', affCode);
@@ -31,10 +27,6 @@ const RegisterForm = () => {
     if (status) {
       status = JSON.parse(status);
       setShowEmailVerification(status.email_verification);
-      if (status.turnstile_check) {
-        setTurnstileEnabled(true);
-        setTurnstileSiteKey(status.turnstile_site_key);
-      }
     }
   });
 
@@ -54,17 +46,13 @@ const RegisterForm = () => {
       return;
     }
     if (username && password) {
-      if (turnstileEnabled && turnstileToken === '') {
-        showInfo('请稍后几秒重试，Turnstile 正在检查用户环境！');
-        return;
-      }
       setLoading(true);
       if (!affCode) {
         affCode = localStorage.getItem('aff');
       }
       inputs.aff_code = affCode;
       const res = await API.post(
-        `/api/user/register?turnstile=${turnstileToken}`,
+        `/api/user/register`,
         inputs
       );
       const { success, message } = res.data;
@@ -80,13 +68,9 @@ const RegisterForm = () => {
 
   const sendVerificationCode = async () => {
     if (inputs.email === '') return;
-    if (turnstileEnabled && turnstileToken === '') {
-      showInfo('请稍后几秒重试，Turnstile 正在检查用户环境！');
-      return;
-    }
     setLoading(true);
     const res = await API.get(
-      `/api/verification?email=${inputs.email}&turnstile=${turnstileToken}`
+      `/api/verification?email=${inputs.email}`
     );
     const { success, message } = res.data;
     if (success) {
@@ -190,16 +174,6 @@ const RegisterForm = () => {
                   </Text>
                 </div>
               </Card>
-              {turnstileEnabled ? (
-                <Turnstile
-                  sitekey={turnstileSiteKey}
-                  onVerify={(token) => {
-                    setTurnstileToken(token);
-                  }}
-                />
-              ) : (
-                <></>
-              )}
             </div>
           </div>
         </Layout.Content>

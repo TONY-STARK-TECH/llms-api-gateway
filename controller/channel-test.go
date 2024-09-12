@@ -29,12 +29,6 @@ import (
 
 func testChannel(channel *model.Channel, testModel string) (openAIErrorWithStatusCode *dto.OpenAIErrorWithStatusCode, err error) {
 	tik := time.Now()
-	if channel.Type == common.ChannelTypeMidjourney {
-		return nil, errors.New("midjourney channel test is not supported")
-	}
-	if channel.Type == common.ChannelTypeSunoAPI {
-		return nil, errors.New("suno channel test is not supported")
-	}
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Request = &http.Request{

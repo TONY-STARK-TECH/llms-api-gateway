@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"one-api/common"
-	"one-api/constant"
 	"one-api/dto"
 	"one-api/model"
 	"one-api/relay"
@@ -13,8 +12,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-// https://platform.openai.com/docs/api-reference/models/list
 
 var openAIModels []dto.OpenAIModels
 var openAIModelsMap map[string]dto.OpenAIModels
@@ -43,9 +40,6 @@ func init() {
 	// https://platform.openai.com/docs/models/model-endpoint-compatibility
 	permission := getPermission()
 	for i := 0; i < relayconstant.APITypeDummy; i++ {
-		if i == relayconstant.APITypeAIProxyLibrary {
-			continue
-		}
 		adaptor := relay.GetAdaptor(i)
 		channelName := adaptor.GetChannelName()
 		modelNames := adaptor.GetModelList()
@@ -61,17 +55,6 @@ func init() {
 			})
 		}
 	}
-	for modelName := range constant.MidjourneyModel2Action {
-		openAIModels = append(openAIModels, dto.OpenAIModels{
-			Id:         modelName,
-			Object:     "model",
-			Created:    1626777600,
-			OwnedBy:    "midjourney",
-			Permission: permission,
-			Root:       modelName,
-			Parent:     nil,
-		})
-	}
 	openAIModelsMap = make(map[string]dto.OpenAIModels)
 	for _, aiModel := range openAIModels {
 		openAIModelsMap[aiModel.Id] = aiModel
@@ -79,7 +62,7 @@ func init() {
 	channelId2Models = make(map[int][]string)
 	for i := 1; i <= common.ChannelTypeDummy; i++ {
 		apiType, success := relayconstant.ChannelType2APIType(i)
-		if !success || apiType == relayconstant.APITypeAIProxyLibrary {
+		if !success {
 			continue
 		}
 		meta := &relaycommon.RelayInfo{ChannelType: i}

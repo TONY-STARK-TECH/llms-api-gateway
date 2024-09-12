@@ -129,39 +129,7 @@ const OtherSetting = () => {
       setLoadingInput((loadingInput) => ({ ...loadingInput, About: false }));
     }
   };
-  // 个性化设置 - 页脚
-  const submitFooter = async () => {
-    try {
-      setLoadingInput((loadingInput) => ({ ...loadingInput, Footer: true }));
-      await updateOption('Footer', inputs.Footer);
-      showSuccess('页脚内容已更新');
-    } catch (error) {
-      console.error('页脚内容更新失败', error);
-      showError('页脚内容更新失败');
-    } finally {
-      setLoadingInput((loadingInput) => ({ ...loadingInput, Footer: false }));
-    }
-  };
-
-  const openGitHubRelease = () => {
-    window.location = 'https://github.com/songquanpeng/one-api/releases/latest';
-  };
-
-  const checkUpdate = async () => {
-    const res = await API.get(
-      'https://api.github.com/repos/songquanpeng/one-api/releases/latest',
-    );
-    const { tag_name, body } = res.data;
-    if (tag_name === process.env.REACT_APP_VERSION) {
-      showSuccess(`已是最新版本：${tag_name}`);
-    } else {
-      setUpdateData({
-        tag_name: tag_name,
-        content: marked.parse(body),
-      });
-      setShowUpdateModal(true);
-    }
-  };
+  
   const getOptions = async () => {
     const res = await API.get('/api/option/');
     const { success, message, data } = res.data;
@@ -208,28 +176,6 @@ const OtherSetting = () => {
           </Form.Section>
         </Form>
       </Col>
-      {/*<Modal*/}
-      {/*  onClose={() => setShowUpdateModal(false)}*/}
-      {/*  onOpen={() => setShowUpdateModal(true)}*/}
-      {/*  open={showUpdateModal}*/}
-      {/*>*/}
-      {/*  <Modal.Header>新版本：{updateData.tag_name}</Modal.Header>*/}
-      {/*  <Modal.Content>*/}
-      {/*    <Modal.Description>*/}
-      {/*      <div dangerouslySetInnerHTML={{ __html: updateData.content }}></div>*/}
-      {/*    </Modal.Description>*/}
-      {/*  </Modal.Content>*/}
-      {/*  <Modal.Actions>*/}
-      {/*    <Button onClick={() => setShowUpdateModal(false)}>关闭</Button>*/}
-      {/*    <Button*/}
-      {/*      content='详情'*/}
-      {/*      onClick={() => {*/}
-      {/*        setShowUpdateModal(false);*/}
-      {/*        openGitHubRelease();*/}
-      {/*      }}*/}
-      {/*    />*/}
-      {/*  </Modal.Actions>*/}
-      {/*</Modal>*/}
     </Row>
   );
 };

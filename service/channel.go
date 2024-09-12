@@ -37,12 +37,6 @@ func ShouldDisableChannel(channelType int, err *relaymodel.OpenAIErrorWithStatus
 	if err.StatusCode == http.StatusUnauthorized {
 		return true
 	}
-	if err.StatusCode == http.StatusForbidden {
-		switch channelType {
-		case common.ChannelTypeGemini:
-			return true
-		}
-	}
 	switch err.Error.Code {
 	case "invalid_api_key":
 		return true

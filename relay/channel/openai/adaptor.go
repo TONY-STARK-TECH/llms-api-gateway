@@ -13,7 +13,6 @@ import (
 	"one-api/relay/channel"
 	relaycommon "one-api/relay/common"
 	"one-api/relay/constant"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,34 +27,12 @@ func (a *Adaptor) Init(info *relaycommon.RelayInfo) {
 }
 
 func (a *Adaptor) GetRequestURL(info *relaycommon.RelayInfo) (string, error) {
-	switch info.ChannelType {
-	case common.ChannelTypeAzure:
-		// https://learn.microsoft.com/en-us/azure/cognitive-services/openai/chatgpt-quickstart?pivots=rest-api&tabs=command-line#rest-api
-		requestURL := strings.Split(info.RequestURLPath, "?")[0]
-		requestURL = fmt.Sprintf("%s?api-version=%s", requestURL, info.ApiVersion)
-		task := strings.TrimPrefix(requestURL, "/v1/")
-		model_ := info.UpstreamModelName
-		model_ = strings.Replace(model_, ".", "", -1)
-		// https://github.com/songquanpeng/one-api/issues/67
-
-		requestURL = fmt.Sprintf("/openai/deployments/%s/%s", model_, task)
-		return relaycommon.GetFullRequestURL(info.BaseUrl, requestURL, info.ChannelType), nil
-	case common.ChannelTypeCustom:
-		url := info.BaseUrl
-		url = strings.Replace(url, "{model}", info.UpstreamModelName, -1)
-		return url, nil
-	default:
-		return relaycommon.GetFullRequestURL(info.BaseUrl, info.RequestURLPath, info.ChannelType), nil
-	}
+	return relaycommon.GetFullRequestURL(info.BaseUrl, info.RequestURLPath, info.ChannelType), nil
 }
 
 func (a *Adaptor) SetupRequestHeader(c *gin.Context, req *http.Request, info *relaycommon.RelayInfo) error {
 	channel.SetupApiRequestHeader(info, c, req)
-	if info.ChannelType == common.ChannelTypeAzure {
-		req.Header.Set("api-key", info.ApiKey)
-		return nil
-	}
-	if info.ChannelType == common.ChannelTypeOpenAI && "" != info.Organization {
+	if info.ChannelType == common.ChannelTypeOpenAI && info.Organization != "" {
 		req.Header.Set("OpenAI-Organization", info.Organization)
 	}
 	req.Header.Set("Authorization", "Bearer "+info.ApiKey)

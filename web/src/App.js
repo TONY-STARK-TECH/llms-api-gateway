@@ -10,7 +10,6 @@ import Setting from './pages/Setting';
 import EditUser from './pages/User/EditUser';
 import { getLogo, getSystemName } from './helpers';
 import PasswordResetForm from './components/PasswordResetForm';
-import GitHubOAuth from './components/GitHubOAuth';
 import PasswordResetConfirm from './components/PasswordResetConfirm';
 import { UserContext } from './context/User';
 import Channel from './pages/Channel';
@@ -21,9 +20,7 @@ import TopUp from './pages/TopUp';
 import Log from './pages/Log';
 import Chat from './pages/Chat';
 import { Layout } from '@douyinfe/semi-ui';
-import Midjourney from './pages/Midjourney';
 import Pricing from './pages/Pricing/index.js';
-import Task from "./pages/Task/index.js";
 // import Detail from './pages/Detail';
 
 const Home = lazy(() => import('./pages/Home'));
@@ -165,14 +162,6 @@ function App() {
             }
           />
           <Route
-            path='/oauth/github'
-            element={
-              <Suspense fallback={<Loading></Loading>}>
-                <GitHubOAuth />
-              </Suspense>
-            }
-          />
-          <Route
             path='/setting'
             element={
               <PrivateRoute>
@@ -208,26 +197,6 @@ function App() {
                   <Detail />
                 </Suspense>
               </PrivateRoute>
-            }
-          />
-          <Route
-            path='/midjourney'
-            element={
-              <PrivateRoute>
-                <Suspense fallback={<Loading></Loading>}>
-                  <Midjourney />
-                </Suspense>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path='/task'
-            element={
-                <PrivateRoute>
-                    <Suspense fallback={<Loading></Loading>}>
-                        <Task />
-                    </Suspense>
-                </PrivateRoute>
             }
           />
           <Route

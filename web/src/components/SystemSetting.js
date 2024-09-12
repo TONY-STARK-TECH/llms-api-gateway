@@ -16,9 +16,6 @@ const SystemSetting = () => {
     PasswordLoginEnabled: '',
     PasswordRegisterEnabled: '',
     EmailVerificationEnabled: '',
-    GitHubOAuthEnabled: '',
-    GitHubClientId: '',
-    GitHubClientSecret: '',
     Notice: '',
     SMTPServer: '',
     SMTPPort: '',
@@ -32,27 +29,15 @@ const SystemSetting = () => {
     MinTopUp: 1,
     TopupGroupRatio: '',
     Footer: '',
-    WeChatAuthEnabled: '',
-    WeChatServerAddress: '',
-    WeChatServerToken: '',
-    WeChatAccountQRCodeImageURL: '',
-    TurnstileCheckEnabled: '',
-    TurnstileSiteKey: '',
-    TurnstileSecretKey: '',
     RegisterEnabled: '',
     EmailDomainRestrictionEnabled: '',
     EmailAliasRestrictionEnabled: '',
     SMTPSSLEnabled: '',
     EmailDomainWhitelist: [],
-    // telegram login
-    TelegramOAuthEnabled: '',
-    TelegramBotToken: '',
-    TelegramBotName: '',
   });
   const [originInputs, setOriginInputs] = useState({});
   let [loading, setLoading] = useState(false);
   const [EmailDomainWhitelist, setEmailDomainWhitelist] = useState([]);
-  const [restrictedDomainInput, setRestrictedDomainInput] = useState('');
   const [showPasswordWarningModal, setShowPasswordWarningModal] =
     useState(false);
 
@@ -97,10 +82,6 @@ const SystemSetting = () => {
       case 'PasswordLoginEnabled':
       case 'PasswordRegisterEnabled':
       case 'EmailVerificationEnabled':
-      case 'GitHubOAuthEnabled':
-      case 'WeChatAuthEnabled':
-      case 'TelegramOAuthEnabled':
-      case 'TurnstileCheckEnabled':
       case 'EmailDomainRestrictionEnabled':
       case 'EmailAliasRestrictionEnabled':
       case 'SMTPSSLEnabled':
@@ -151,17 +132,8 @@ const SystemSetting = () => {
       name === 'WeChatMerchantCert' ||
       name === 'WeChatMerchantKey' ||
       name === 'Price' ||
-      name === 'GitHubClientId' ||
-      name === 'GitHubClientSecret' ||
-      name === 'WeChatServerAddress' ||
-      name === 'WeChatServerToken' ||
-      name === 'WeChatAccountQRCodeImageURL' ||
-      name === 'TurnstileSiteKey' ||
-      name === 'TurnstileSecretKey' ||
       name === 'EmailDomainWhitelist' ||
-      name === 'TopupGroupRatio' ||
-      name === 'TelegramBotToken' ||
-      name === 'TelegramBotName'
+      name === 'TopupGroupRatio'
     ) {
       setInputs((inputs) => ({ ...inputs, [name]: value }));
     } else {
@@ -240,30 +212,6 @@ const SystemSetting = () => {
       inputs.SMTPToken !== ''
     ) {
       await updateOption('SMTPToken', inputs.SMTPToken);
-    }
-  };
-
-  const submitWeChat = async () => {
-    if (originInputs['WeChatServerAddress'] !== inputs.WeChatServerAddress) {
-      await updateOption(
-        'WeChatServerAddress',
-        removeTrailingSlash(inputs.WeChatServerAddress),
-      );
-    }
-    if (
-      originInputs['WeChatAccountQRCodeImageURL'] !==
-      inputs.WeChatAccountQRCodeImageURL
-    ) {
-      await updateOption(
-        'WeChatAccountQRCodeImageURL',
-        inputs.WeChatAccountQRCodeImageURL,
-      );
-    }
-    if (
-      originInputs['WeChatServerToken'] !== inputs.WeChatServerToken &&
-      inputs.WeChatServerToken !== ''
-    ) {
-      await updateOption('WeChatServerToken', inputs.WeChatServerToken);
     }
   };
 
@@ -476,51 +424,6 @@ const SystemSetting = () => {
             />
           </Form.Group>
           <Form.Button onClick={submitSMTP}>保存 SMTP 设置</Form.Button>
-          <Divider />
-          <Header as='h3' inverted={isDark}>
-            配置 WeChat Server
-            <Header.Subheader>
-              用以支持通过微信进行登录注册，
-              <a
-                href='https://github.com/songquanpeng/wechat-server'
-                target='_blank'
-                rel='noreferrer'
-              >
-                点击此处
-              </a>
-              了解 WeChat Server
-            </Header.Subheader>
-          </Header>
-          <Form.Group widths={3}>
-            <Form.Input
-              label='WeChat Server 服务器地址'
-              name='WeChatServerAddress'
-              placeholder='例如：https://yourdomain.com'
-              onChange={handleInputChange}
-              autoComplete='new-password'
-              value={inputs.WeChatServerAddress}
-            />
-            <Form.Input
-              label='WeChat Server 访问凭证'
-              name='WeChatServerToken'
-              type='password'
-              onChange={handleInputChange}
-              autoComplete='new-password'
-              value={inputs.WeChatServerToken}
-              placeholder='敏感信息不会发送到前端显示'
-            />
-            <Form.Input
-              label='微信公众号二维码图片链接'
-              name='WeChatAccountQRCodeImageURL'
-              onChange={handleInputChange}
-              autoComplete='new-password'
-              value={inputs.WeChatAccountQRCodeImageURL}
-              placeholder='输入一个图片链接'
-            />
-          </Form.Group>
-          <Form.Button onClick={submitWeChat}>
-            保存 WeChat Server 设置
-          </Form.Button>
         </Form>
       </Grid.Column>
     </Grid>

@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"one-api/common"
-	"one-api/constant"
 	"one-api/controller"
 	"one-api/middleware"
 	"one-api/model"
@@ -15,7 +14,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/bytedance/gopkg/util/gopool"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -65,8 +63,6 @@ func main() {
 		common.FatalLog("failed to initialize Redis: " + err.Error())
 	}
 
-	// Initialize constants
-	constant.InitEnv()
 	// Initialize options
 	model.InitOptionMap()
 	if common.RedisEnabled {
@@ -102,14 +98,6 @@ func main() {
 			common.FatalLog("failed to parse CHANNEL_TEST_FREQUENCY: " + err.Error())
 		}
 		go controller.AutomaticallyTestChannels(frequency)
-	}
-	if common.IsMasterNode && constant.UpdateTask {
-		gopool.Go(func() {
-			controller.UpdateMidjourneyTaskBulk()
-		})
-		gopool.Go(func() {
-			controller.UpdateTaskBulk()
-		})
 	}
 	if os.Getenv("BATCH_UPDATE_ENABLED") == "true" {
 		common.BatchUpdateEnabled = true

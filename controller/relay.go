@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"one-api/common"
 	"one-api/dto"
@@ -143,8 +142,7 @@ func shouldRetry(c *gin.Context, openaiErr *dto.OpenAIErrorWithStatusCode, retry
 		return true
 	}
 	if openaiErr.StatusCode == http.StatusBadRequest {
-		channelType := c.GetInt("channel_type")
-		return channelType == common.ChannelTypeAnthropic
+		return false
 	}
 	if openaiErr.StatusCode == 408 {
 		// azure处理超时不重试
@@ -162,39 +160,6 @@ func processChannelError(c *gin.Context, channelId int, channelType int, channel
 	common.LogError(c, fmt.Sprintf("relay error (channel #%d, status code: %d): %s", channelId, err.StatusCode, err.Error.Message))
 	if service.ShouldDisableChannel(channelType, err) && autoBan {
 		service.DisableChannel(channelId, channelName, err.Error.Message)
-	}
-}
-
-func RelayMidjourney(c *gin.Context) {
-	relayMode := c.GetInt("relay_mode")
-	var err *dto.MidjourneyResponse
-	switch relayMode {
-	case relayconstant.RelayModeMidjourneyNotify:
-		err = relay.RelayMidjourneyNotify(c)
-	case relayconstant.RelayModeMidjourneyTaskFetch, relayconstant.RelayModeMidjourneyTaskFetchByCondition:
-		err = relay.RelayMidjourneyTask(c, relayMode)
-	case relayconstant.RelayModeMidjourneyTaskImageSeed:
-		err = relay.RelayMidjourneyTaskImageSeed(c)
-	case relayconstant.RelayModeSwapFace:
-		err = relay.RelaySwapFace(c)
-	default:
-		err = relay.RelayMidjourneySubmit(c, relayMode)
-	}
-	//err = relayMidjourneySubmit(c, relayMode)
-	log.Println(err)
-	if err != nil {
-		statusCode := http.StatusBadRequest
-		if err.Code == 30 {
-			err.Result = "当前分组负载已饱和，请稍后再试，或升级账户以提升服务质量。"
-			statusCode = http.StatusTooManyRequests
-		}
-		c.JSON(statusCode, gin.H{
-			"description": fmt.Sprintf("%s %s", err.Description, err.Result),
-			"type":        "upstream_error",
-			"code":        err.Code,
-		})
-		channelId := c.GetInt("channel_id")
-		common.LogError(c, fmt.Sprintf("relay error (channel #%d, status code %d): %s", channelId, statusCode, fmt.Sprintf("%s %s", err.Description, err.Result)))
 	}
 }
 
@@ -220,95 +185,4 @@ func RelayNotFound(c *gin.Context) {
 	c.JSON(http.StatusNotFound, gin.H{
 		"error": err,
 	})
-}
-
-func RelayTask(c *gin.Context) {
-	retryTimes := common.RetryTimes
-	channelId := c.GetInt("channel_id")
-	relayMode := c.GetInt("relay_mode")
-	group := c.GetString("group")
-	originalModel := c.GetString("original_model")
-	c.Set("use_channel", []string{fmt.Sprintf("%d", channelId)})
-	taskErr := taskRelayHandler(c, relayMode)
-	if taskErr == nil {
-		retryTimes = 0
-	}
-	for i := 0; shouldRetryTaskRelay(c, channelId, taskErr, retryTimes) && i < retryTimes; i++ {
-		channel, err := model.CacheGetRandomSatisfiedChannel(group, originalModel, i)
-		if err != nil {
-			common.LogError(c, fmt.Sprintf("CacheGetRandomSatisfiedChannel failed: %s", err.Error()))
-			break
-		}
-		channelId = channel.Id
-		useChannel := c.GetStringSlice("use_channel")
-		useChannel = append(useChannel, fmt.Sprintf("%d", channelId))
-		c.Set("use_channel", useChannel)
-		common.LogInfo(c, fmt.Sprintf("using channel #%d to retry (remain times %d)", channel.Id, i))
-		middleware.SetupContextForSelectedChannel(c, channel, originalModel)
-
-		requestBody, _ := common.GetRequestBody(c)
-		c.Request.Body = io.NopCloser(bytes.NewBuffer(requestBody))
-		taskErr = taskRelayHandler(c, relayMode)
-	}
-	useChannel := c.GetStringSlice("use_channel")
-	if len(useChannel) > 1 {
-		retryLogStr := fmt.Sprintf("重试：%s", strings.Trim(strings.Join(strings.Fields(fmt.Sprint(useChannel)), "->"), "[]"))
-		common.LogInfo(c, retryLogStr)
-	}
-	if taskErr != nil {
-		if taskErr.StatusCode == http.StatusTooManyRequests {
-			taskErr.Message = "当前分组上游负载已饱和，请稍后再试"
-		}
-		c.JSON(taskErr.StatusCode, taskErr)
-	}
-}
-
-func taskRelayHandler(c *gin.Context, relayMode int) *dto.TaskError {
-	var err *dto.TaskError
-	switch relayMode {
-	case relayconstant.RelayModeSunoFetch, relayconstant.RelayModeSunoFetchByID:
-		err = relay.RelayTaskFetch(c, relayMode)
-	default:
-		err = relay.RelayTaskSubmit(c, relayMode)
-	}
-	return err
-}
-
-func shouldRetryTaskRelay(c *gin.Context, _ int, taskErr *dto.TaskError, retryTimes int) bool {
-	if taskErr == nil {
-		return false
-	}
-	if retryTimes <= 0 {
-		return false
-	}
-	if _, ok := c.Get("specific_channel_id"); ok {
-		return false
-	}
-	if taskErr.StatusCode == http.StatusTooManyRequests {
-		return true
-	}
-	if taskErr.StatusCode == 307 {
-		return true
-	}
-	if taskErr.StatusCode/100 == 5 {
-		// 超时不重试
-		if taskErr.StatusCode == 504 || taskErr.StatusCode == 524 {
-			return false
-		}
-		return true
-	}
-	if taskErr.StatusCode == http.StatusBadRequest {
-		return false
-	}
-	if taskErr.StatusCode == 408 {
-		// azure处理超时不重试
-		return false
-	}
-	if taskErr.LocalError {
-		return false
-	}
-	if taskErr.StatusCode/100 == 2 {
-		return false
-	}
-	return true
 }

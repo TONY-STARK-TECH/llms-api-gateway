@@ -34,12 +34,10 @@ const SiderBar = () => {
     topup: '/topup',
     user: '/user',
     log: '/log',
-    midjourney: '/midjourney',
     setting: '/setting',
     chat: '/chat',
     detail: '/detail',
     pricing: '/pricing',
-    task: '/task',
   };
 
   const headerButtons = useMemo(
@@ -105,24 +103,6 @@ const SiderBar = () => {
             : 'tableHiddle',
       },
       {
-        text: '绘图',
-        itemKey: 'midjourney',
-        to: '/midjourney',
-        className:
-          localStorage.getItem('enable_drawing') === 'true'
-            ? 'semi-navigation-item-normal'
-            : 'tableHiddle',
-      },
-      {
-        text: '任务',
-        itemKey: 'task',
-        to: '/task',
-        className:
-            localStorage.getItem('enable_task') === 'true'
-                ? 'semi-navigation-item-normal'
-                : 'tableHiddle',
-      },
-      {
         text: '设置',
         itemKey: 'setting',
         to: '/setting',
@@ -130,8 +110,6 @@ const SiderBar = () => {
     ],
     [
       localStorage.getItem('enable_data_export'),
-      localStorage.getItem('enable_drawing'),
-      localStorage.getItem('enable_task'),
       localStorage.getItem('chat_link'),
       isAdmin(),
     ],

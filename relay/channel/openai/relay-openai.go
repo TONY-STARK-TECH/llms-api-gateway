@@ -5,8 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/bytedance/gopkg/util/gopool"
-	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
 	"one-api/common"
@@ -18,6 +16,9 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/bytedance/gopkg/util/gopool"
+	"github.com/gin-gonic/gin"
 )
 
 func OaiStreamHandler(c *gin.Context, resp *http.Response, info *relaycommon.RelayInfo) (*dto.OpenAIErrorWithStatusCode, *dto.Usage) {
@@ -320,6 +321,10 @@ func OpenaiSTTHandler(c *gin.Context, resp *http.Response, info *relaycommon.Rel
 		text, err = getTextFromVerboseJSON(responseBody)
 	case "vtt":
 		text, err = getTextFromVTT(responseBody)
+	}
+
+	if err != nil {
+		return service.OpenAIErrorWrapper(err, "get_response_from_json_failed", http.StatusInternalServerError), nil
 	}
 
 	usage := &dto.Usage{}

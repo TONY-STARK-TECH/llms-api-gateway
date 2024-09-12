@@ -103,12 +103,7 @@ func InitDB() (err error) {
 		if !common.IsMasterNode {
 			return nil
 		}
-		//if common.UsingMySQL {
-		//	_, _ = sqlDB.Exec("DROP INDEX idx_channels_key ON channels;")             // TODO: delete this line when most users have upgraded
-		//	_, _ = sqlDB.Exec("ALTER TABLE midjourneys MODIFY action VARCHAR(40);")   // TODO: delete this line when most users have upgraded
-		//	_, _ = sqlDB.Exec("ALTER TABLE midjourneys MODIFY progress VARCHAR(30);") // TODO: delete this line when most users have upgraded
-		//	_, _ = sqlDB.Exec("ALTER TABLE midjourneys MODIFY status VARCHAR(20);")   // TODO: delete this line when most users have upgraded
-		//}
+		// Create tables	
 		common.SysLog("database migration started")
 		err = migrateDB()
 		return err
@@ -140,12 +135,6 @@ func InitLogDB() (err error) {
 		if !common.IsMasterNode {
 			return nil
 		}
-		//if common.UsingMySQL {
-		//	_, _ = sqlDB.Exec("DROP INDEX idx_channels_key ON channels;")             // TODO: delete this line when most users have upgraded
-		//	_, _ = sqlDB.Exec("ALTER TABLE midjourneys MODIFY action VARCHAR(40);")   // TODO: delete this line when most users have upgraded
-		//	_, _ = sqlDB.Exec("ALTER TABLE midjourneys MODIFY progress VARCHAR(30);") // TODO: delete this line when most users have upgraded
-		//	_, _ = sqlDB.Exec("ALTER TABLE midjourneys MODIFY status VARCHAR(20);")   // TODO: delete this line when most users have upgraded
-		//}
 		common.SysLog("database migration started")
 		err = migrateLOGDB()
 		return err
@@ -184,19 +173,11 @@ func migrateDB() error {
 	if err != nil {
 		return err
 	}
-	err = DB.AutoMigrate(&Midjourney{})
-	if err != nil {
-		return err
-	}
 	err = DB.AutoMigrate(&TopUp{})
 	if err != nil {
 		return err
 	}
 	err = DB.AutoMigrate(&QuotaData{})
-	if err != nil {
-		return err
-	}
-	err = DB.AutoMigrate(&Task{})
 	if err != nil {
 		return err
 	}

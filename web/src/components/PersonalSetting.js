@@ -8,18 +8,14 @@ import {
   showInfo,
   showSuccess,
 } from '../helpers';
-import Turnstile from 'react-turnstile';
 import { UserContext } from '../context/User';
-import { onGitHubOAuthClicked } from './utils';
 import {
   Avatar,
-  Banner,
   Button,
   Card,
   Descriptions,
   Image,
   Input,
-  InputNumber,
   Layout,
   Modal,
   Space,
@@ -29,17 +25,13 @@ import {
 import {
   getQuotaPerUnit,
   renderQuota,
-  renderQuotaWithPrompt,
   stringToColor,
 } from '../helpers/render';
-import TelegramLoginButton from 'react-telegram-login';
 
 const PersonalSetting = () => {
   const [userState, userDispatch] = useContext(UserContext);
-  let navigate = useNavigate();
 
   const [inputs, setInputs] = useState({
-    wechat_verification_code: '',
     email_verification_code: '',
     email: '',
     self_account_deletion_confirmation: '',
@@ -48,11 +40,7 @@ const PersonalSetting = () => {
   });
   const [status, setStatus] = useState({});
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
-  const [showWeChatBindModal, setShowWeChatBindModal] = useState(false);
   const [showEmailBindModal, setShowEmailBindModal] = useState(false);
-  const [turnstileEnabled, setTurnstileEnabled] = useState(false);
-  const [turnstileSiteKey, setTurnstileSiteKey] = useState('');
-  const [turnstileToken, setTurnstileToken] = useState('');
   const [loading, setLoading] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
   const [countdown, setCountdown] = useState(30);
@@ -73,10 +61,6 @@ const PersonalSetting = () => {
     if (status) {
       status = JSON.parse(status);
       setStatus(status);
-      if (status.turnstile_check) {
-        setTurnstileEnabled(true);
-        setTurnstileSiteKey(status.turnstile_site_key);
-      }
     }
     getUserData().then((res) => {
       console.log(userState);
@@ -135,20 +119,6 @@ const PersonalSetting = () => {
     }
   };
 
-  const bindWeChat = async () => {
-    if (inputs.wechat_verification_code === '') return;
-    const res = await API.get(
-      `/api/oauth/wechat/bind?code=${inputs.wechat_verification_code}`,
-    );
-    const { success, message } = res.data;
-    if (success) {
-      showSuccess('微信账户绑定成功！');
-      setShowWeChatBindModal(false);
-    } else {
-      showError(message);
-    }
-  };
-
   const changePassword = async () => {
     if (inputs.set_new_password !== inputs.set_new_password_confirmation) {
       showError('两次输入的密码不一致！');
@@ -160,7 +130,6 @@ const PersonalSetting = () => {
     const { success, message } = res.data;
     if (success) {
       showSuccess('密码修改成功！');
-      setShowWeChatBindModal(false);
     } else {
       showError(message);
     }
@@ -173,13 +142,9 @@ const PersonalSetting = () => {
       return;
     }
     setDisableButton(true);
-    if (turnstileEnabled && turnstileToken === '') {
-      showInfo('请稍后几秒重试，Turnstile 正在检查用户环境！');
-      return;
-    }
     setLoading(true);
     const res = await API.get(
-      `/api/verification?email=${inputs.email}&turnstile=${turnstileToken}`,
+      `/api/verification?email=${inputs.email}`,
     );
     const { success, message } = res.data;
     if (success) {
@@ -335,39 +300,6 @@ const PersonalSetting = () => {
                     修改密码
                   </Button>
                 </Space>
-                {/* <Space>
-                  <Button
-                      style={{marginLeft: 8}}
-                      onClick={() => {
-                        setShowWeChatBindModal(true);
-                      }}
-                    >
-                      绑定微信账号
-                  </Button>
-                </Space> */}
-                <Modal
-                  onCancel={() => setShowWeChatBindModal(false)}
-                  visible={showWeChatBindModal}
-                  size={'small'}
-                >
-                  <Image src={status.wechat_qrcode} />
-                  <div style={{ textAlign: 'center' }}>
-                    <p>
-                      微信扫码关注公众号，输入「验证码」获取验证码（三分钟内有效）
-                    </p>
-                  </div>
-                  <Input
-                    placeholder='验证码'
-                    name='wechat_verification_code'
-                    value={inputs.wechat_verification_code}
-                    onChange={(v) =>
-                      handleInputChange('wechat_verification_code', v)
-                    }
-                  />
-                  <Button color='' fluid size='large' onClick={bindWeChat}>
-                    绑定
-                  </Button>
-                </Modal>
               </div>
             </Card>
             <Modal
@@ -412,16 +344,6 @@ const PersonalSetting = () => {
                   }
                 />
               </div>
-              {turnstileEnabled ? (
-                <Turnstile
-                  sitekey={turnstileSiteKey}
-                  onVerify={(token) => {
-                    setTurnstileToken(token);
-                  }}
-                />
-              ) : (
-                <></>
-              )}
             </Modal>
             <Modal
               onCancel={() => setShowChangePasswordModal(false)}
@@ -448,16 +370,6 @@ const PersonalSetting = () => {
                     handleInputChange('set_new_password_confirmation', value)
                   }
                 />
-                {turnstileEnabled ? (
-                  <Turnstile
-                    sitekey={turnstileSiteKey}
-                    onVerify={(token) => {
-                      setTurnstileToken(token);
-                    }}
-                  />
-                ) : (
-                  <></>
-                )}
               </div>
             </Modal>
           </div>

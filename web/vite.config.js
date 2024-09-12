@@ -41,9 +41,7 @@ export default defineConfig({
           'react-components': [
             'react-dropzone',
             'react-fireworks',
-            'react-telegram-login',
-            'react-toastify',
-            'react-turnstile',
+            'react-toastify'
           ],
         },
       },

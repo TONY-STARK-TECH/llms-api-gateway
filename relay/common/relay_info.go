@@ -1,11 +1,12 @@
 package common
 
 import (
-	"github.com/gin-gonic/gin"
 	"one-api/common"
 	"one-api/relay/constant"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type RelayInfo struct {
@@ -68,15 +69,7 @@ func GenRelayInfo(c *gin.Context) *RelayInfo {
 	if info.BaseUrl == "" {
 		info.BaseUrl = common.ChannelBaseURLs[channelType]
 	}
-	if info.ChannelType == common.ChannelTypeAzure {
-		info.ApiVersion = GetAPIVersion(c)
-	}
-	if info.ChannelType == common.ChannelTypeVertexAi {
-		info.ApiVersion = c.GetString("region")
-	}
-	if info.ChannelType == common.ChannelTypeOpenAI || info.ChannelType == common.ChannelTypeAnthropic ||
-		info.ChannelType == common.ChannelTypeAws || info.ChannelType == common.ChannelTypeGemini ||
-		info.ChannelType == common.ChannelCloudflare {
+	if info.ChannelType == common.ChannelTypeOpenAI {
 		info.SupportStreamOptions = true
 	}
 	return info
@@ -95,54 +88,4 @@ func (info *RelayInfo) SetFirstResponseTime() {
 		info.FirstResponseTime = time.Now()
 		info.setFirstResponse = true
 	}
-}
-
-type TaskRelayInfo struct {
-	ChannelType       int
-	ChannelId         int
-	TokenId           int
-	UserId            int
-	Group             string
-	StartTime         time.Time
-	ApiType           int
-	RelayMode         int
-	UpstreamModelName string
-	RequestURLPath    string
-	ApiKey            string
-	BaseUrl           string
-
-	Action       string
-	OriginTaskID string
-
-	ConsumeQuota bool
-}
-
-func GenTaskRelayInfo(c *gin.Context) *TaskRelayInfo {
-	channelType := c.GetInt("channel_type")
-	channelId := c.GetInt("channel_id")
-
-	tokenId := c.GetInt("token_id")
-	userId := c.GetInt("id")
-	group := c.GetString("group")
-	startTime := time.Now()
-
-	apiType, _ := constant.ChannelType2APIType(channelType)
-
-	info := &TaskRelayInfo{
-		RelayMode:      constant.Path2RelayMode(c.Request.URL.Path),
-		BaseUrl:        c.GetString("base_url"),
-		RequestURLPath: c.Request.URL.String(),
-		ChannelType:    channelType,
-		ChannelId:      channelId,
-		TokenId:        tokenId,
-		UserId:         userId,
-		Group:          group,
-		StartTime:      startTime,
-		ApiType:        apiType,
-		ApiKey:         strings.TrimPrefix(c.Request.Header.Get("Authorization"), "Bearer "),
-	}
-	if info.BaseUrl == "" {
-		info.BaseUrl = common.ChannelBaseURLs[channelType]
-	}
-	return info
 }

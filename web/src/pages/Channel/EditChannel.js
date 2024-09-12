@@ -96,49 +96,7 @@ const EditChannel = (props) => {
   const handleInputChange = (name, value) => {
     setInputs((inputs) => ({ ...inputs, [name]: value }));
     if (name === 'type') {
-      let localModels = [];
-      switch (value) {
-        case 2:
-          localModels = [
-            'mj_imagine',
-            'mj_variation',
-            'mj_reroll',
-            'mj_blend',
-            'mj_upscale',
-            'mj_describe',
-            'mj_uploads',
-          ];
-          break;
-        case 5:
-          localModels = [
-            'swap_face',
-            'mj_imagine',
-            'mj_variation',
-            'mj_reroll',
-            'mj_blend',
-            'mj_upscale',
-            'mj_describe',
-            'mj_zoom',
-            'mj_shorten',
-            'mj_modal',
-            'mj_inpaint',
-            'mj_custom_zoom',
-            'mj_high_variation',
-            'mj_low_variation',
-            'mj_pan',
-            'mj_uploads',
-          ];
-          break;
-        case 36:
-          localModels = [
-            'suno_music',
-            'suno_lyrics',
-          ];
-          break;
-        default:
-          localModels = getChannelModels(value);
-          break;
-      }
+      let localModels = getChannelModels(value);
       if (inputs.models.length === 0) {
         setInputs((inputs) => ({ ...inputs, models: localModels }));
       }
@@ -536,7 +494,7 @@ const EditChannel = (props) => {
                 <Input
                     name='base_url'
                     placeholder={
-                      '请输入到 /suno 前的路径，通常就是域名，例如：https://api.example.com '
+                      '请输入例如：https://api.example.com '
                     }
                     onChange={(value) => {
                       handleInputChange('base_url', value);
@@ -577,97 +535,6 @@ const EditChannel = (props) => {
             autoComplete='new-password'
             optionList={groupOptions}
           />
-          {inputs.type === 18 && (
-            <>
-              <div style={{ marginTop: 10 }}>
-                <Typography.Text strong>模型版本：</Typography.Text>
-              </div>
-              <Input
-                name='other'
-                placeholder={
-                  '请输入星火大模型版本，注意是接口地址中的版本号，例如：v2.1'
-                }
-                onChange={(value) => {
-                  handleInputChange('other', value);
-                }}
-                value={inputs.other}
-                autoComplete='new-password'
-              />
-            </>
-          )}
-          {inputs.type === 41 && (
-            <>
-              <div style={{ marginTop: 10 }}>
-                <Typography.Text strong>部署地区：</Typography.Text>
-              </div>
-              <TextArea
-                name='other'
-                placeholder={
-                  '请输入部署地区，例如：us-central1\n支持使用模型映射格式\n' +
-                  '{\n' +
-                  '    "default": "us-central1",\n' +
-                  '    "claude-3-5-sonnet-20240620": "europe-west1"\n' +
-                  '}'
-                }
-                autosize={{ minRows: 2 }}
-                onChange={(value) => {
-                  handleInputChange('other', value);
-                }}
-                value={inputs.other}
-                autoComplete='new-password'
-              />
-              <Typography.Text
-                style={{
-                  color: 'rgba(var(--semi-blue-5), 1)',
-                  userSelect: 'none',
-                  cursor: 'pointer',
-                }}
-                onClick={() => {
-                  handleInputChange(
-                    'other',
-                    JSON.stringify(REGION_EXAMPLE, null, 2),
-                  );
-                }}
-              >
-                填入模板
-              </Typography.Text>
-            </>
-          )}
-          {inputs.type === 21 && (
-            <>
-              <div style={{ marginTop: 10 }}>
-                <Typography.Text strong>知识库 ID：</Typography.Text>
-              </div>
-              <Input
-                label='知识库 ID'
-                name='other'
-                placeholder={'请输入知识库 ID，例如：123456'}
-                onChange={(value) => {
-                  handleInputChange('other', value);
-                }}
-                value={inputs.other}
-                autoComplete='new-password'
-              />
-            </>
-          )}
-          {inputs.type === 39 && (
-            <>
-              <div style={{ marginTop: 10 }}>
-                <Typography.Text strong>Account ID：</Typography.Text>
-              </div>
-              <Input
-                name='other'
-                placeholder={
-                  '请输入Account ID，例如：d6b5da8hk1awo8nap34ube6gh'
-                }
-                onChange={(value) => {
-                  handleInputChange('other', value);
-                }}
-                value={inputs.other}
-                autoComplete='new-password'
-              />
-            </>
-          )}
           <div style={{ marginTop: 10 }}>
             <Typography.Text strong>模型：</Typography.Text>
           </div>

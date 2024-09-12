@@ -1,10 +1,10 @@
 package router
 
 import (
-	"github.com/gin-gonic/gin"
 	"one-api/controller"
 	"one-api/middleware"
-	"one-api/relay"
+
+	"github.com/gin-gonic/gin"
 )
 
 func SetRelayRouter(router *gin.Engine) {
@@ -43,42 +43,5 @@ func SetRelayRouter(router *gin.Engine) {
 		relayV1Router.DELETE("/models/:model", controller.RelayNotImplemented)
 		relayV1Router.POST("/moderations", controller.Relay)
 		relayV1Router.POST("/rerank", controller.Relay)
-	}
-
-	relayMjRouter := router.Group("/mj")
-	registerMjRouterGroup(relayMjRouter)
-
-	relayMjModeRouter := router.Group("/:mode/mj")
-	registerMjRouterGroup(relayMjModeRouter)
-	//relayMjRouter.Use()
-
-	relaySunoRouter := router.Group("/suno")
-	relaySunoRouter.Use(middleware.TokenAuth(), middleware.Distribute())
-	{
-		relaySunoRouter.POST("/submit/:action", controller.RelayTask)
-		relaySunoRouter.POST("/fetch", controller.RelayTask)
-		relaySunoRouter.GET("/fetch/:id", controller.RelayTask)
-	}
-
-}
-
-func registerMjRouterGroup(relayMjRouter *gin.RouterGroup) {
-	relayMjRouter.GET("/image/:id", relay.RelayMidjourneyImage)
-	relayMjRouter.Use(middleware.TokenAuth(), middleware.Distribute())
-	{
-		relayMjRouter.POST("/submit/action", controller.RelayMidjourney)
-		relayMjRouter.POST("/submit/shorten", controller.RelayMidjourney)
-		relayMjRouter.POST("/submit/modal", controller.RelayMidjourney)
-		relayMjRouter.POST("/submit/imagine", controller.RelayMidjourney)
-		relayMjRouter.POST("/submit/change", controller.RelayMidjourney)
-		relayMjRouter.POST("/submit/simple-change", controller.RelayMidjourney)
-		relayMjRouter.POST("/submit/describe", controller.RelayMidjourney)
-		relayMjRouter.POST("/submit/blend", controller.RelayMidjourney)
-		relayMjRouter.POST("/notify", controller.RelayMidjourney)
-		relayMjRouter.GET("/task/:id/fetch", controller.RelayMidjourney)
-		relayMjRouter.GET("/task/:id/image-seed", controller.RelayMidjourney)
-		relayMjRouter.POST("/task/list-by-condition", controller.RelayMidjourney)
-		relayMjRouter.POST("/insight-face/swap", controller.RelayMidjourney)
-		relayMjRouter.POST("/submit/upload-discord-images", controller.RelayMidjourney)
 	}
 }

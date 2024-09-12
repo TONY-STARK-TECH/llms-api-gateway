@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Form, Grid, Header, Image, Segment } from 'semantic-ui-react';
 import { API, showError, showInfo, showSuccess } from '../helpers';
-import Turnstile from 'react-turnstile';
 
 const PasswordResetForm = () => {
   const [inputs, setInputs] = useState({
@@ -10,9 +9,6 @@ const PasswordResetForm = () => {
   const { email } = inputs;
 
   const [loading, setLoading] = useState(false);
-  const [turnstileEnabled, setTurnstileEnabled] = useState(false);
-  const [turnstileSiteKey, setTurnstileSiteKey] = useState('');
-  const [turnstileToken, setTurnstileToken] = useState('');
   const [disableButton, setDisableButton] = useState(false);
   const [countdown, setCountdown] = useState(30);
 
@@ -37,13 +33,9 @@ const PasswordResetForm = () => {
   async function handleSubmit(e) {
     setDisableButton(true);
     if (!email) return;
-    if (turnstileEnabled && turnstileToken === '') {
-      showInfo('请稍后几秒重试，Turnstile 正在检查用户环境！');
-      return;
-    }
     setLoading(true);
     const res = await API.get(
-      `/api/reset_password?email=${email}&turnstile=${turnstileToken}`,
+      `/api/reset_password?email=${email}`,
     );
     const { success, message } = res.data;
     if (success) {
@@ -72,16 +64,6 @@ const PasswordResetForm = () => {
               value={email}
               onChange={handleChange}
             />
-            {turnstileEnabled ? (
-              <Turnstile
-                sitekey={turnstileSiteKey}
-                onVerify={(token) => {
-                  setTurnstileToken(token);
-                }}
-              />
-            ) : (
-              <></>
-            )}
             <Button
               color='green'
               fluid

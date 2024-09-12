@@ -172,18 +172,6 @@ func updateChannelBalance(channel *model.Channel) (float64, error) {
 		if channel.GetBaseURL() != "" {
 			baseURL = channel.GetBaseURL()
 		}
-	case common.ChannelTypeAzure:
-		return 0, errors.New("尚未实现")
-	case common.ChannelTypeCustom:
-		baseURL = channel.GetBaseURL()
-	//case common.ChannelTypeOpenAISB:
-	//	return updateChannelOpenAISBBalance(channel)
-	case common.ChannelTypeAIProxy:
-		return updateChannelAIProxyBalance(channel)
-	case common.ChannelTypeAPI2GPT:
-		return updateChannelAPI2GPTBalance(channel)
-	case common.ChannelTypeAIGC2D:
-		return updateChannelAIGC2DBalance(channel)
 	default:
 		return 0, errors.New("尚未实现")
 	}
@@ -261,7 +249,7 @@ func updateAllChannelsBalance() error {
 			continue
 		}
 		// TODO: support Azure
-		if channel.Type != common.ChannelTypeOpenAI && channel.Type != common.ChannelTypeCustom {
+		if channel.Type != common.ChannelTypeOpenAI {
 			continue
 		}
 		balance, err := updateChannelBalance(channel)

@@ -24,8 +24,6 @@ const EditUser = (props) => {
     username: '',
     display_name: '',
     password: '',
-    github_id: '',
-    wechat_id: '',
     email: '',
     quota: 0,
     group: 'default',
@@ -35,12 +33,8 @@ const EditUser = (props) => {
     username,
     display_name,
     password,
-    github_id,
-    wechat_id,
-    telegram_id,
     email,
     quota,
-    group,
   } = inputs;
   const handleInputChange = (name, value) => {
     setInputs((inputs) => ({ ...inputs, [name]: value }));
@@ -58,7 +52,7 @@ const EditUser = (props) => {
       showError(error.message);
     }
   };
-  const navigate = useNavigate();
+  
   const handleCancel = () => {
     props.handleClose();
   };
@@ -220,41 +214,11 @@ const EditUser = (props) => {
           )}
           <Divider style={{ marginTop: 20 }}>以下信息不可修改</Divider>
           <div style={{ marginTop: 20 }}>
-            <Typography.Text>已绑定的 GitHub 账户</Typography.Text>
-          </div>
-          <Input
-            name='github_id'
-            value={github_id}
-            autoComplete='new-password'
-            placeholder='此项只读，需要用户通过个人设置页面的相关绑定按钮进行绑定，不可直接修改'
-            readonly
-          />
-          <div style={{ marginTop: 20 }}>
-            <Typography.Text>已绑定的微信账户</Typography.Text>
-          </div>
-          <Input
-            name='wechat_id'
-            value={wechat_id}
-            autoComplete='new-password'
-            placeholder='此项只读，需要用户通过个人设置页面的相关绑定按钮进行绑定，不可直接修改'
-            readonly
-          />
-          <div style={{ marginTop: 20 }}>
             <Typography.Text>已绑定的邮箱账户</Typography.Text>
           </div>
           <Input
             name='email'
             value={email}
-            autoComplete='new-password'
-            placeholder='此项只读，需要用户通过个人设置页面的相关绑定按钮进行绑定，不可直接修改'
-            readonly
-          />
-          <div style={{ marginTop: 20 }}>
-            <Typography.Text>已绑定的Telegram账户</Typography.Text>
-          </div>
-          <Input
-            name='telegram_id'
-            value={telegram_id}
             autoComplete='new-password'
             placeholder='此项只读，需要用户通过个人设置页面的相关绑定按钮进行绑定，不可直接修改'
             readonly

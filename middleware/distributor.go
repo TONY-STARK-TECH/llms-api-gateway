@@ -1,15 +1,11 @@
 package middleware
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"one-api/common"
-	"one-api/constant"
-	"one-api/dto"
 	"one-api/model"
 	relayconstant "one-api/relay/constant"
-	"one-api/service"
 	"strconv"
 	"strings"
 
@@ -98,56 +94,6 @@ func Distribute() func(c *gin.Context) {
 func getModelRequest(c *gin.Context) (*ModelRequest, bool, error) {
 	var modelRequest ModelRequest
 	shouldSelectChannel := true
-	var err error
-	if strings.Contains(c.Request.URL.Path, "/mj/") {
-		relayMode := relayconstant.Path2RelayModeMidjourney(c.Request.URL.Path)
-		if relayMode == relayconstant.RelayModeMidjourneyTaskFetch ||
-			relayMode == relayconstant.RelayModeMidjourneyTaskFetchByCondition ||
-			relayMode == relayconstant.RelayModeMidjourneyNotify ||
-			relayMode == relayconstant.RelayModeMidjourneyTaskImageSeed {
-			shouldSelectChannel = false
-		} else {
-			midjourneyRequest := dto.MidjourneyRequest{}
-			err = common.UnmarshalBodyReusable(c, &midjourneyRequest)
-			if err != nil {
-				abortWithMidjourneyMessage(c, http.StatusBadRequest, constant.MjErrorUnknown, "无效的请求, "+err.Error())
-				return nil, false, err
-			}
-			midjourneyModel, mjErr, success := service.GetMjRequestModel(relayMode, &midjourneyRequest)
-			if mjErr != nil {
-				abortWithMidjourneyMessage(c, http.StatusBadRequest, mjErr.Code, mjErr.Description)
-				return nil, false, fmt.Errorf(mjErr.Description)
-			}
-			if midjourneyModel == "" {
-				if !success {
-					abortWithMidjourneyMessage(c, http.StatusBadRequest, constant.MjErrorUnknown, "无效的请求, 无法解析模型")
-					return nil, false, fmt.Errorf("无效的请求, 无法解析模型")
-				} else {
-					// task fetch, task fetch by condition, notify
-					shouldSelectChannel = false
-				}
-			}
-			modelRequest.Model = midjourneyModel
-		}
-		c.Set("relay_mode", relayMode)
-	} else if strings.Contains(c.Request.URL.Path, "/suno/") {
-		relayMode := relayconstant.Path2RelaySuno(c.Request.Method, c.Request.URL.Path)
-		if relayMode == relayconstant.RelayModeSunoFetch ||
-			relayMode == relayconstant.RelayModeSunoFetchByID {
-			shouldSelectChannel = false
-		} else {
-			modelName := service.CoverTaskActionToModelName(constant.TaskPlatformSuno, c.Param("action"))
-			modelRequest.Model = modelName
-		}
-		c.Set("platform", string(constant.TaskPlatformSuno))
-		c.Set("relay_mode", relayMode)
-	} else if !strings.HasPrefix(c.Request.URL.Path, "/v1/audio/transcriptions") {
-		err = common.UnmarshalBodyReusable(c, &modelRequest)
-	}
-	if err != nil {
-		abortWithOpenAiMessage(c, http.StatusBadRequest, "无效的请求, "+err.Error())
-		return nil, false, errors.New("无效的请求, " + err.Error())
-	}
 	if strings.HasPrefix(c.Request.URL.Path, "/v1/moderations") {
 		if modelRequest.Model == "" {
 			modelRequest.Model = "text-moderation-stable"
@@ -195,19 +141,4 @@ func SetupContextForSelectedChannel(c *gin.Context, channel *model.Channel, mode
 	c.Set("status_code_mapping", channel.GetStatusCodeMapping())
 	c.Request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", channel.Key))
 	c.Set("base_url", channel.GetBaseURL())
-	// TODO: api_version统一
-	switch channel.Type {
-	case common.ChannelTypeAzure:
-		c.Set("api_version", channel.Other)
-	case common.ChannelTypeVertexAi:
-		c.Set("region", channel.Other)
-	case common.ChannelTypeXunfei:
-		c.Set("api_version", channel.Other)
-	case common.ChannelTypeGemini:
-		c.Set("api_version", channel.Other)
-	case common.ChannelTypeAli:
-		c.Set("plugin", channel.Other)
-	case common.ChannelCloudflare:
-		c.Set("api_version", channel.Other)
-	}
 }
