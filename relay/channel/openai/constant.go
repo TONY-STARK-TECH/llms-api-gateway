@@ -12,6 +12,11 @@ var ModelList = []string{
 	"whisper-1",
 	"tts-1", 
 	"tts-1-hd",
+
+	"o1-mini",
+	"o1-mini-2024-09-12",
+	"o1-preview",
+	"o1-preview-2024-09-12",
 }
 
 var ChannelName = "openai"

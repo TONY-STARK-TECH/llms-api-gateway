@@ -23,6 +23,11 @@ var defaultModelRatio = map[string]float64{
 	"whisper-1":                      15,  // $0.006 / minute -> $0.006 / 150 words -> $0.006 / 200 tokens -> $0.03 / 1k tokens
 	"tts-1":                          7.5, // 1k characters -> $0.015
 	"tts-1-hd":                       15,  // 1k characters -> $0.03
+
+	"o1-mini": 3,
+	"o1-mini-2024-09-12": 3,
+	"o1-preview": 15,
+	"o1-preview-2024-09-12": 15,
 }
 
 var defaultModelPrice = map[string]float64{
@@ -163,6 +168,9 @@ func GetCompletionRatio(name string) float64 {
 			return 3
 		}
 		return 2
+	}
+	if strings.HasPrefix(name, "o1") {
+		return 4
 	}
 	if ratio, ok := CompletionRatio[name]; ok {
 		return ratio
