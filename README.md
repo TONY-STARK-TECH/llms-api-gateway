@@ -9,6 +9,7 @@
 3. 支持微信支付，配置即可使用
 4. 只做 OpenAI 官方直连代理，不支持其他大模型 [专业]
 5. 官方中转直连，接口耗时降低至 `500ms` 左右
+6. 适配 o1 模型，客户端无需修改即可直接使用
 
 <img width="1379" alt="image" src="https://github.com/user-attachments/assets/4d2dab48-1ea5-40ed-ac40-2e32cb21547c">
 
