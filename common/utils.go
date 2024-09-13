@@ -1,8 +1,8 @@
 package common
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"html/template"
 	"log"
 	"math/rand"
@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func OpenBrowser(url string) {
@@ -186,4 +188,32 @@ func MessageWithRequestId(message string, id string) string {
 func RandomSleep() {
 	// Sleep for 0-3000 ms
 	time.Sleep(time.Duration(rand.Intn(3000)) * time.Millisecond)
+}
+
+func RemoveKeysFromJSONObject(input *map[string]json.RawMessage, keys []string) error {
+	removeKeysFromJSONObject(input, keys)
+	return nil
+}
+
+func removeKeysFromJSONObject(input *map[string]json.RawMessage, keys []string) {
+	for _, key := range keys {
+		delete(*input, key)
+	}
+}
+
+func RemoveKeysFromJSONObjectBytes(input *[]byte, keys []string) error {
+	var output map[string]json.RawMessage
+	if err := json.Unmarshal(*input, &output); err != nil {
+		return err
+	}
+	err := RemoveKeysFromJSONObject(&output, keys)
+	if err != nil {
+		return err
+	}
+	outputBytes, err := json.Marshal(&output)
+	if err != nil {
+		return err
+	}
+	*input = outputBytes
+	return nil
 }

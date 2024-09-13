@@ -61,6 +61,14 @@ func getAndValidateTextRequest(c *gin.Context, relayInfo *relaycommon.RelayInfo)
 		}
 	}
 	relayInfo.IsStream = textRequest.Stream
+
+	// fixed o1
+	if strings.HasPrefix(textRequest.Model, "o1-") {
+		textRequest.MaxCompletionTokens = textRequest.MaxTokens
+		textRequest.Stream = false
+		relayInfo.IsStream = false
+	}
+
 	return textRequest, nil
 }
 
@@ -115,7 +123,7 @@ func TextHelper(c *gin.Context) *dto.OpenAIErrorWithStatusCode {
 	if !getModelPriceSuccess {
 		preConsumedTokens := common.PreConsumedQuota
 		if textRequest.MaxTokens != 0 {
-			preConsumedTokens = promptTokens + int(textRequest.MaxTokens)
+			preConsumedTokens = promptTokens + int(math.Max(float64(textRequest.MaxTokens), float64(textRequest.MaxCompletionTokens)))
 		}
 		modelRatio = common.GetModelRatio(textRequest.Model)
 		ratio = modelRatio * groupRatio
@@ -164,6 +172,21 @@ func TextHelper(c *gin.Context) *dto.OpenAIErrorWithStatusCode {
 		return service.OpenAIErrorWrapperLocal(err, "convert_request_failed", http.StatusInternalServerError)
 	}
 	jsonData, err := json.Marshal(convertedRequest)
+	// Remove not support Keys
+	if strings.HasPrefix(textRequest.Model, "o1-") {
+		notSupportKeys := []string {
+			"max_tokens",
+			"system",
+			"tools",
+			"json_object",
+			"structured",
+			"logprops",
+		}
+		common.RemoveKeysFromJSONObjectBytes(&jsonData, notSupportKeys)
+	} else {
+		// Normally do not need this key.
+		common.RemoveKeysFromJSONObjectBytes(&jsonData, []string {"max_completion_tokens"})
+	}
 	if err != nil {
 		return service.OpenAIErrorWrapperLocal(err, "json_marshal_failed", http.StatusInternalServerError)
 	}

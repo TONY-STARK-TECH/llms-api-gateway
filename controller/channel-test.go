@@ -19,6 +19,7 @@ import (
 	"one-api/relay/constant"
 	"one-api/service"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -91,6 +92,23 @@ func testChannel(channel *model.Channel, testModel string) (openAIErrorWithStatu
 	if err != nil {
 		return nil, err
 	}
+
+	// Remove not support Keys
+	if strings.HasPrefix(request.Model, "o1-") {
+		notSupportKeys := []string {
+			"max_tokens",
+			"system",
+			"tools",
+			"json_object",
+			"structured",
+			"logprops",
+		}
+		common.RemoveKeysFromJSONObjectBytes(&jsonData, notSupportKeys)
+	} else {
+		// Normally do not need this key.
+		common.RemoveKeysFromJSONObjectBytes(&jsonData, []string {"max_completion_tokens"})
+	}
+	
 	requestBody := bytes.NewBuffer(jsonData)
 	c.Request.Body = io.NopCloser(requestBody)
 	resp, err := adaptor.DoRequest(c, meta, requestBody)
@@ -140,6 +158,7 @@ func buildTestRequest() *dto.GeneralOpenAIRequest {
 	testRequest := &dto.GeneralOpenAIRequest{
 		Model:     "", // this will be set later
 		MaxTokens: 1,
+		MaxCompletionTokens: 1, // o1
 		Stream:    false,
 	}
 	content, _ := json.Marshal("hi")

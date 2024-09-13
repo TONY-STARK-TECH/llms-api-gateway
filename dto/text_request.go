@@ -1,6 +1,9 @@
 package dto
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"math"
+)
 
 type ResponseFormat struct {
 	Type string `json:"type,omitempty"`
@@ -13,6 +16,7 @@ type GeneralOpenAIRequest struct {
 	Stream           bool           `json:"stream,omitempty"`
 	StreamOptions    *StreamOptions `json:"stream_options,omitempty"`
 	MaxTokens        uint           `json:"max_tokens,omitempty"`
+	MaxCompletionTokens uint 		`json:"max_completion_tokens,omitempty"`
 	Temperature      float64        `json:"temperature,omitempty"`
 	TopP             float64        `json:"top_p,omitempty"`
 	TopK             int            `json:"top_k,omitempty"`
@@ -50,7 +54,7 @@ type StreamOptions struct {
 }
 
 func (r GeneralOpenAIRequest) GetMaxTokens() int {
-	return int(r.MaxTokens)
+	return int(math.Max(float64(r.MaxTokens), float64(r.MaxCompletionTokens)))
 }
 
 func (r GeneralOpenAIRequest) ParseInput() []string {
