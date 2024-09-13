@@ -19,7 +19,7 @@ func init() {
 	}
 
 	impatientHTTPClient = &http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: 120 * time.Second,
 	}
 }
 

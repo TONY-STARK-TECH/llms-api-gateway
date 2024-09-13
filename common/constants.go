@@ -92,7 +92,7 @@ var SyncFrequency = GetEnvOrDefault("SYNC_FREQUENCY", 60) // unit is second
 var BatchUpdateEnabled = false
 var BatchUpdateInterval = GetEnvOrDefault("BATCH_UPDATE_INTERVAL", 5)
 
-var RelayTimeout = GetEnvOrDefault("RELAY_TIMEOUT", 0) // unit is second
+var RelayTimeout = GetEnvOrDefault("RELAY_TIMEOUT", 120) // unit is second
 
 // https://docs.cohere.com/docs/safety-modes Type; NONE/CONTEXTUAL/STRICT
 var CohereSafetySetting = GetEnvOrDefaultString("COHERE_SAFETY_SETTING", "NONE")

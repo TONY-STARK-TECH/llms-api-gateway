@@ -62,10 +62,6 @@ func (a *Adaptor) ConvertRequest(c *gin.Context, info *relaycommon.RelayInfo, re
 }
 
 func removeKeys(messages []dto.Message, key string) []dto.Message {
-	common.SysLog("-------")
-	common.SysLog(key)
-	common.SysLog(string(len(messages)))
-	common.SysLog("-------")
 	if len(messages) == 0 {
 		return []dto.Message {}
 	}

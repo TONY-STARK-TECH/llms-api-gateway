@@ -4,7 +4,7 @@ import (
 	"one-api/common"
 )
 
-var StreamingTimeout = common.GetEnvOrDefault("STREAMING_TIMEOUT", 30)
+var StreamingTimeout = common.GetEnvOrDefault("STREAMING_TIMEOUT", 120)
 
 // ForceStreamOption 覆盖请求参数，强制返回usage信息
 var ForceStreamOption = common.GetEnvOrDefaultBool("FORCE_STREAM_OPTION", true)
