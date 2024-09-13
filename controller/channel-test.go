@@ -97,11 +97,6 @@ func testChannel(channel *model.Channel, testModel string) (openAIErrorWithStatu
 	if strings.HasPrefix(request.Model, "o1-") {
 		notSupportKeys := []string {
 			"max_tokens",
-			"system",
-			"tools",
-			"json_object",
-			"structured",
-			"logprops",
 		}
 		common.RemoveKeysFromJSONObjectBytes(&jsonData, notSupportKeys)
 	} else {

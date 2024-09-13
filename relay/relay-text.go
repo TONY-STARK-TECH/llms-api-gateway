@@ -176,11 +176,6 @@ func TextHelper(c *gin.Context) *dto.OpenAIErrorWithStatusCode {
 	if strings.HasPrefix(textRequest.Model, "o1-") {
 		notSupportKeys := []string {
 			"max_tokens",
-			"system",
-			"tools",
-			"json_object",
-			"structured",
-			"logprops",
 		}
 		common.RemoveKeysFromJSONObjectBytes(&jsonData, notSupportKeys)
 	} else {
@@ -197,6 +192,10 @@ func TextHelper(c *gin.Context) *dto.OpenAIErrorWithStatusCode {
 	if err != nil {
 		return service.OpenAIErrorWrapper(err, "do_request_failed", http.StatusInternalServerError)
 	}
+
+	common.SysLog("---------Response--------")
+	j, _ := json.Marshal(resp.Body)
+	common.SysLog(string(j))
 
 	if resp != nil {
 		relayInfo.IsStream = relayInfo.IsStream || strings.HasPrefix(resp.Header.Get("Content-Type"), "text/event-stream")

@@ -13,6 +13,7 @@ import (
 	"one-api/relay/channel"
 	relaycommon "one-api/relay/common"
 	"one-api/relay/constant"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -50,7 +51,39 @@ func (a *Adaptor) ConvertRequest(c *gin.Context, info *relaycommon.RelayInfo, re
 	if info.ChannelType != common.ChannelTypeOpenAI {
 		request.StreamOptions = nil
 	}
+	if strings.HasPrefix(request.Model, "o1-") {
+		request.Messages = removeKeys(request.Messages, "system")
+		request.Messages = removeKeys(request.Messages, "tools")
+		request.Messages = removeKeys(request.Messages, "json_object")
+		request.Messages = removeKeys(request.Messages, "structured")
+		request.Messages = removeKeys(request.Messages, "logprops")
+	}
 	return request, nil
+}
+
+func removeKeys(messages []dto.Message, key string) []dto.Message {
+	common.SysLog("-------")
+	common.SysLog(key)
+	common.SysLog(string(len(messages)))
+	common.SysLog("-------")
+	if len(messages) == 0 {
+		return []dto.Message {}
+	}
+	// Remove system role in message
+	var removedIndex int = -1;
+	for index, value := range messages {
+		if value.Role == key {
+			// Remove this item
+			removedIndex = index
+			break
+		}
+	}
+	// not find
+	if removedIndex < 0 {
+		return messages
+	}
+	// slice this array
+	return append(messages[:removedIndex], messages[removedIndex+1:]...)
 }
 
 func (a *Adaptor) ConvertRerankRequest(c *gin.Context, relayMode int, request dto.RerankRequest) (any, error) {
